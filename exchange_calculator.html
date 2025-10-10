@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>
+            calculator
+        </title>
+    </head>
+    <style>
+        body,input,select,button {
+            text-align: center;
+            font-size: xx-large;
+        }
+    </style>
+    <body>
+        <h2>
+            from
+        </h2>
+        <input type="number" id="number_one">
+        <select name="currency_to_start" id="currency_to_start">
+            <option value="EUR">EUR</option>
+            <option value="USD">USD</option>
+            <option value="JPY">JPY</option>
+            <option value="CAD">CAD</option>
+        </select>
+        <h2>
+            to
+        </h2>
+        <select name="currency_to_convert" id="currency_to_convert">
+            <option value="EUR">EUR</option>
+            <option value="USD">USD</option>
+            <option value="JPY">JPY</option>
+            <option value="CAD">CAD</option>
+        </select>
+        <h1></h1>
+        <button onclick="calculate()">
+            Convert
+        </button>
+        <h2 id="output">
+            Result will appear here
+        </h2>
+        <button onclick="invert()">
+            invert values
+        </button>
+        <script>
+            function calculate() {
+                var start_currency = document.getElementById("currency_to_start").value;
+                var end_currency = document.getElementById("currency_to_convert").value;
+                var money = document.getElementById('number_one').value;
+                var conversion_rate1 = 1;
+                if (start_currency === 'EUR') conversion_rate1 = 1;
+                if (start_currency === 'USD') conversion_rate1 = 1.1758;
+                if (start_currency === 'JPY') conversion_rate1 = 173.65;
+                if (start_currency === 'CAD') conversion_rate1 = 1.64;
+                if (end_currency === 'EUR') conversion_rate2 = 1;
+                if (end_currency === 'USD') conversion_rate2 = 1.1758;
+                if (end_currency === 'JPY') conversion_rate2 = 173.65;
+                if (end_currency === 'CAD') conversion_rate2 = 1.64;
+                var final_money = money * (conversion_rate2/conversion_rate1)
+                document.getElementById('output').innerHTML = final_money
+            }
+            function invert() {
+                var value1 = document.getElementById('currency_to_start').value
+                var value2 = document.getElementById('currency_to_convert').value
+                document.getElementById('currency_to_start').value = value2
+                document.getElementById('currency_to_convert').value = value1
+                calculate()
+            }
+        </script>
+    </body>
+</html>
