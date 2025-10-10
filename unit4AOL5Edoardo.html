@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Unit 4 AOL #5 – Conditionals (Skeleton)</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    section { border: 1px solid #ccc; border-radius: 8px; padding: 12px; margin: 12px 0; }
+    button { padding: 6px 10px; border-radius: 6px; }
+    .out { min-height: 1.2em; padding: 6px; background: #f5f5f5; border-radius: 6px; }
+    #inp1 {
+      width: 300px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Unit 4 – Conditionals (AOL #5)</h1>
+
+  <section id="task1">
+    <h2>Task 1 — Multi‑Rule Eligibility</h2>
+    <button onclick="task1()">Run Task 1</button>
+    <div id="out1" class="out"></div>
+  </section>
+
+  <section id="task2">
+    <h2>Task 2 — Letter Band</h2>
+    <button onclick="task2()">Run Task 2</button>
+    <div id="out2" class="out"></div>
+  </section>
+
+  <section id="task3">
+    <h2>Task 3 — Triangle Classifier</h2>
+    <button onclick="task3()">Run Task 3</button>
+    <div id="out3" class="out"></div>
+  </section>
+
+  <section id="task4">
+    <h2>Task 4 — Month → Season (switch)</h2>
+    <p>Write the input elements on this page yourself.</p>
+    <input type="number" placeholder="Add the number of the month..." id="inp1">
+    <button onclick="task4()">Check Season</button>
+    <div id="out4" class="out"></div>
+  </section>
+
+  <section id="task5">
+    <h2>Task 5 — Order Sentence</h2>
+    <p>Write the input elements on this page for size and toppings yourself.</p>
+    <p>Select the size of the pizza: </p>
+    <label><input type="radio" name="size" value="large">Large (L)</label>
+    <label><input type="radio" name="size" value="medium">Medium (M)</label>
+    <label><input type="radio" name="size" value="small">Small (S)</label>
+    <p>Select the toppings of the pizza (Choose at least 3): </p>
+    <label><input type="checkbox" name="toppings" value="cheese">cheese</label>
+    <label><input type="checkbox" name="toppings" value="pepperoni">pepperoni</label>
+    <label><input type="checkbox" name="toppings" value="salami">salami</label>
+    <label><input type="checkbox" name="toppings" value="ham">ham</label>
+    <label><input type="checkbox" name="toppings" value="olives">olives</label>
+    <button onclick="task5()">Place Order</button>
+    <div id="out5" class="out"></div>
+  </section>
+
+  <script>// Task 1 — Multi-Rule Eligibility
+    function task1() {
+        // Ask user for age
+        var age = parseInt(prompt('How old are you?'));
+        // Ask if user has a student card
+        var card = prompt('Do you have a student card? (yes/no)');
+        // Ask if user is a member
+        var member = prompt('Are you a member? (yes/no)');
+
+        // Check eligibility according to rules: 
+        // - age < 13
+        // - age >= 65
+        // - has student card AND is a member 
+        // Display eligibility and reason
+        if (age < 13) {
+            document.getElementById('out1').innerHTML = 'Yes, you are eligible because you are less than 13 years old';
+        } else if (age >= 65) {
+            document.getElementById('out1').innerHTML = 'Yes, you are eligible because you are 65 years old or older';
+        } else if (card == 'yes' && member == 'yes') {
+            document.getElementById('out1').innerHTML = 'Yes, you are eligible because you are a member and you have a student card';
+        } else {
+            document.getElementById('out1').innerHTML = 'No, you are not eligible because none of the rules apply';
+        }
+    }
+
+    // Task 2 — Letter Band assignment
+    function task2() {
+        // Prompt for three marks and check input validity
+        var vote1 = parseInt(prompt('What is the first grade?'));
+        var vote2 = parseInt(prompt('What is the second grade?'));
+        var vote3 = parseInt(prompt('What is the third grade?'));
+        // Only accept values between 0 and 100 for all grades
+        if (vote1 > 100 || vote1 < 0 || vote2 > 100 || vote2 < 0 || vote3 > 100 || vote3 < 0) {
+            document.getElementById('out2').innerHTML = 'Please enter numbers between 0 and 100';
+            return;
+        }
+        // Calculate average to 1 decimal
+        var average = ((vote1 + vote2 + vote3) / 3).toFixed(1);
+        var grade;
+        // Assign band letter by average using else if logic chain
+        if (average >= 90) {
+            grade = "A";
+        } else if (average >= 80) {
+            grade = "B";
+        } else if (average >= 70) {
+            grade = "C";
+        } else if (average >= 60) {
+            grade = "D";
+        } else {
+            grade = "F";
+        }
+        // Display final formatted result
+        document.getElementById('out2').innerHTML = "Average: " + average + " → " + grade;
+    }
+
+    // Task 3 — Triangle Classifier
+    function task3() {
+        // Ask for three triangle sides
+        var side1 = parseInt(prompt('What is the length of the first side?'));
+        var side2 = parseInt(prompt('What is the length of the second side?'));
+        var side3 = parseInt(prompt('What is the length of the third side?'));
+        // Output side values
+        var sides = "Side 1: " + side1 + "<br>Side 2: " + side2 + "<br>Side 3: " + side3;
+        var content;
+        // Check triangle inequality to validate triangle existence
+        if (side1 + side2 > side3 && side1 + side3 > side2 && side2 + side3 > side1) {
+            // Classification logic: check for equilateral, isosceles, scalene
+            if (side1 == side2 && side2 == side3) {
+                content = "<br>This is an equilateral triangle";
+            } else if (side1 == side2 || side2 == side3 || side1 == side3) {
+                content = "<br>This is an isosceles triangle";
+            } else {
+                content = "<br>This is a scalene triangle";
+            }
+        } else {
+            content = "<br>Not a valid triangle";
+        }
+        document.getElementById('out3').innerHTML = sides + content;
+    }
+
+    // Task 4 — Month to Season mapping
+    function task4() {
+        // Get selected month as a number from the input field
+        var month = parseInt(document.getElementById('inp1').value);
+        var season;
+        // Use switch statement for mapping month to season
+        switch(month) {
+            case 12: case 1: case 2:
+                season = "Winter"; break;
+            case 3: case 4: case 5:
+                season = "Spring"; break;
+            case 6: case 7: case 8:
+                season = "Summer"; break;
+            case 9: case 10: case 11:
+                season = "Fall"; break;
+            default:
+                season = "Invalid month";
+        }
+        // Output result
+        document.getElementById('out4').innerHTML = "Month " + month + " = " + season;
+    }
+
+    //For fun I tried to do task 5, but I can't do it without using a for loop. This is the maximum that I can do with the actual expected knowledges.
+    function task5() {
+      var selected5 = document.querySelector('input[name="size"]:checked');
+      if (selected5 == null) {
+        document.getElementById('out5').innerHTML = "Chose the size first!";
+      }
+      else {
+        var selected51 = document.querySelector('input[name="toppings"]:checked');
+        if (selected51 == null) {
+          document.getElementById('out5').innerHTML = "You chose a " + selected5.value + " pizza with no extra toppings!";
+        }
+        else {
+          var final_content = "You chose a " + selected5.value + " pizza with " + selected51.value + ".";
+          document.getElementById('out5').innerHTML = final_content;
+        }
+      }
+    }
+
+  </script>
+</body>
+</html>
