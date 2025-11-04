@@ -244,7 +244,30 @@
         <p id="credits"> by EdoChianale</p>
         <script>
             document.body.style.zoom=0.8;this.blur();
-            var verbs = [["Volo","vis","volui","velle"],["Malo","mavis","malui","malle"],["Fugio","fugis","fugi","fugere"],["Carpio","carpis","carpi","carpere"]];
+            var verbs = [
+                ["Volo","vis","volui","velle"],
+                ["Malo","mavis","malui","malle"],
+                ["Fugio","fugis","fugi","fugere"],
+                ["Carpio","carpis","carpi","carpere"],
+                ["Sum","es","fui","esse"],
+                ["Fero","fers","tuli","latum","ferre"],
+                ["Eo","is","ii","itum","ire"],
+                ["Possum","potes","potui","posse"],
+                ["Fio","fis","factus sum","fieri"],
+                ["Do","das","dedi","datum","dare"],
+                ["Edo","edis","edi","esum","edere"],
+                ["Nolo","non vis","nolui","nolle"],
+                ["Facio","facis","feci","factum","facere"],
+                ["Cupio","cupis","cupivi","cupitum","cupere"],
+                ["Venio","venis","veni","ventum","venire"],
+                ["Capio","capis","cepi","captum","capere"],
+                ["Disco","discis","didici","discere"],
+                ["Rapio","rapis","rapui","raptum","rapere"],
+                ["Video","vides","vidi","visum","videre"],
+                ["Audio","audis","audivi","auditum","audire"],
+                ["Sapio","sapis","sapivi","sapere"]
+            ];
+
             var random_verb = verbs[Math.floor(Math.random() * verbs.length)][0];
             document.getElementById("verb").innerHTML = random_verb;
             var streak = 0;
@@ -264,10 +287,13 @@
                 
                 var correct = true;
                 var correct_verb = verbs.find(v => v[0] === random_verb);
-                
-                for (j=0; j<answer_listed.length; j++){
-                    if (answer_listed[j] != correct_verb[j].toLowerCase()) {
-                        correct = false;
+                if (answer_listed.length > correct_verb.length) {
+                    correct = false
+                } else {
+                    for (j=0; j<answer_listed.length; j++){
+                        if (answer_listed[j] != correct_verb[j].toLowerCase()) {
+                            correct = false;
+                        }
                     }
                 }
                 if (correct){
@@ -282,6 +308,7 @@
                 document.getElementById("next").innerHTML = "Andiamo col prossimooo!"
             random_verb = verbs[Math.floor(Math.random() * verbs.length)][0];
             document.getElementById("verb").innerHTML = random_verb;
+            document.getElementById("answer").value = ""
             }
         </script>
     </body>
