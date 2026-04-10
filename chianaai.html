@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>ChianaAI</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #0a0a0f;
+    --surface:   #12121a;
+    --border:    #1e1e2e;
+    --accent:    #5e9bff;
+    --accent2:   #a78bfa;
+    --text:      #e8e8f0;
+    --muted:     #5a5a7a;
+    --success:   #4ade80;
+    --error:     #f87171;
+    --radius:    14px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px 40px;
+    gap: 20px;
+  }
+
+  /* ── Noise overlay ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+  }
+
+  .card {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 560px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+  }
+
+  /* ── Header ── */
+  header {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    width: 100%;
+    max-width: 560px;
+  }
+
+  header h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(2rem, 8vw, 3rem);
+    letter-spacing: -1px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  header p {
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin-top: 4px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* ── Labels ── */
+  label {
+    display: block;
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  /* ── Inputs ── */
+  .input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  input[type="text"], input[type="password"], input[type="url"] {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.82rem;
+    padding: 10px 40px 10px 12px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  input:focus { border-color: var(--accent); }
+
+  .eye-btn {
+    position: absolute;
+    right: 10px;
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0;
+    line-height: 1;
+    transition: color 0.2s;
+  }
+  .eye-btn:hover { color: var(--text); }
+
+  /* ── Drop zone ── */
+  #dropzone {
+    border: 2px dashed var(--border);
+    border-radius: var(--radius);
+    padding: 32px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    position: relative;
+  }
+
+  #dropzone:hover, #dropzone.drag-over {
+    border-color: var(--accent);
+    background: rgba(94,155,255,0.04);
+  }
+
+  #dropzone input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+  }
+
+  #dropzone .dz-icon {
+    font-size: 2rem;
+    margin-bottom: 8px;
+  }
+
+  #dropzone .dz-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  #dropzone .dz-sub {
+    font-size: 0.7rem;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  #file-name {
+    font-size: 0.75rem;
+    color: var(--accent);
+    margin-top: 10px;
+    min-height: 18px;
+    text-align: center;
+    word-break: break-all;
+  }
+
+  /* ── Progress ── */
+  #progress-wrap {
+    display: none;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  #progress-wrap.visible { display: flex; }
+
+  #progress-bar-track {
+    width: 100%;
+    height: 6px;
+    background: var(--border);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+
+  #progress-bar-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 99px;
+    transition: width 0.3s ease;
+  }
+
+  #progress-label {
+    font-size: 0.7rem;
+    color: var(--muted);
+    text-align: right;
+  }
+
+  /* ── Transcribe button ── */
+  #transcribe-btn {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+  }
+
+  #transcribe-btn:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); }
+  #transcribe-btn:active:not(:disabled) { transform: translateY(0); }
+  #transcribe-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  /* ── Result ── */
+  #result-wrap { display: none; }
+  #result-wrap.visible { display: block; }
+
+  #result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  #result-meta {
+    font-size: 0.68rem;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+  }
+
+  #copy-btn {
+    background: var(--border);
+    border: none;
+    border-radius: 6px;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    padding: 5px 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  #copy-btn:hover { background: #2a2a3e; }
+  #copy-btn.copied { color: var(--success); }
+
+  #result-text {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+    font-size: 0.85rem;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-height: 320px;
+    overflow-y: auto;
+    color: var(--text);
+    user-select: text;
+  }
+
+  /* ── Status / error ── */
+  #status {
+    font-size: 0.72rem;
+    text-align: center;
+    min-height: 18px;
+    color: var(--muted);
+  }
+
+  #status.error { color: var(--error); }
+  #status.success { color: var(--success); }
+
+  /* ── Scrollbar ── */
+  #result-text::-webkit-scrollbar { width: 4px; }
+  #result-text::-webkit-scrollbar-track { background: transparent; }
+  #result-text::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>ChianaAI</h1>
+  <p>Whisper large-v3 transcription</p>
+</header>
+
+<!-- Server config — hardcoded, not shown in UI -->
+<input type="hidden" id="server-url" value="https://blightingly-in-golly.ngrok-free.app">
+<input type="hidden" id="api-token" value="zVtdyYyxAbDZJ4DfY_-OC4aeZk9MxeWyhpoEkvIwq6M">
+
+<!-- File picker -->
+<div class="card">
+  <label>Audio File</label>
+  <div id="dropzone">
+    <input type="file" id="file-input" accept="audio/*,video/*">
+    <div class="dz-icon">🎙️</div>
+    <div class="dz-title">Tap to select a file</div>
+    <div class="dz-sub">mp3 · wav · m4a · flac · ogg · mp4 · and more</div>
+  </div>
+  <div id="file-name"></div>
+</div>
+
+<!-- Progress -->
+<div class="card" id="progress-wrap">
+  <label>Transcribing…</label>
+  <div id="progress-bar-track">
+    <div id="progress-bar-fill"></div>
+  </div>
+  <div id="progress-label">0%</div>
+</div>
+
+<!-- Action -->
+<div style="width:100%;max-width:560px;position:relative;z-index:1;">
+  <button id="transcribe-btn" disabled>Transcribe</button>
+</div>
+
+<!-- Status -->
+<div id="status"></div>
+
+<!-- Result -->
+<div class="card" id="result-wrap">
+  <div id="result-header">
+    <span id="result-meta"></span>
+    <button id="copy-btn">Copy</button>
+  </div>
+  <div id="result-text"></div>
+</div>
+
+<script>
+  // ── State ──────────────────────────────────────────────────────────────────
+  let selectedFile = null;
+
+  // ── Config (hardcoded) ───────────────────────────────────────────────────────
+  const urlInput   = document.getElementById('server-url');
+  const tokenInput = document.getElementById('api-token');
+
+  // ── File picker ────────────────────────────────────────────────────────────
+  const fileInput  = document.getElementById('file-input');
+  const dropzone   = document.getElementById('dropzone');
+  const fileNameEl = document.getElementById('file-name');
+  const transcribeBtn = document.getElementById('transcribe-btn');
+
+  fileInput.addEventListener('change', () => {
+    if (fileInput.files.length > 0) _setFile(fileInput.files[0]);
+  });
+
+  dropzone.addEventListener('dragover',  e => { e.preventDefault(); dropzone.classList.add('drag-over'); });
+  dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
+  dropzone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropzone.classList.remove('drag-over');
+    if (e.dataTransfer.files.length > 0) _setFile(e.dataTransfer.files[0]);
+  });
+
+  function _setFile(file) {
+    selectedFile = file;
+    fileNameEl.textContent = `📎 ${file.name}  (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
+    transcribeBtn.disabled = false;
+    _setStatus('');
+  }
+
+  // ── Transcribe ─────────────────────────────────────────────────────────────
+  transcribeBtn.addEventListener('click', async () => {
+    const serverUrl = urlInput.value.trim().replace(/\/$/, '');
+    const token     = tokenInput.value.trim();
+
+    if (!serverUrl) { _setStatus('Please enter the server URL.', 'error'); return; }
+    if (!token)     { _setStatus('Please enter the API token.', 'error'); return; }
+    if (!selectedFile) { _setStatus('Please select a file.', 'error'); return; }
+
+    _setBusy(true);
+    _setProgress(0);
+    _setStatus('Uploading…');
+    document.getElementById('result-wrap').classList.remove('visible');
+
+    const formData = new FormData();
+    formData.append('file', selectedFile, selectedFile.name);
+
+    try {
+      const response = await fetch(`${serverUrl}/transcribe?token=${encodeURIComponent(token)}`, {
+        method: 'POST',
+        body:   formData,
+      });
+
+      if (response.status === 401) { _setStatus('Authentication failed. Check your token.', 'error'); _setBusy(false); return; }
+      if (!response.ok)            { _setStatus(`Server error ${response.status}.`, 'error'); _setBusy(false); return; }
+
+      // Read NDJSON stream line by line
+      const reader  = response.body.getReader();
+      const decoder = new TextDecoder();
+      let   buffer  = '';
+
+      _setStatus('Transcribing…');
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop();  // keep incomplete last line in buffer
+
+        for (const line of lines) {
+          if (!line.trim()) continue;
+          try {
+            const msg = JSON.parse(line);
+
+            if (msg.type === 'progress') {
+              _setProgress(msg.pct);
+              _setStatus(`Transcribing… ${msg.pct}%`);
+            }
+            else if (msg.type === 'result') {
+              _setProgress(100);
+              _showResult(msg.text, msg.language, msg.duration);
+              _setStatus('Done!', 'success');
+            }
+            else if (msg.type === 'error') {
+              _setStatus(`Server error: ${msg.detail}`, 'error');
+            }
+          } catch (_) {}
+        }
+      }
+
+    } catch (err) {
+      _setStatus(`Cannot reach server. Is ngrok running? (${err.message})`, 'error');
+    } finally {
+      _setBusy(false);
+    }
+  });
+
+  // ── Copy button ────────────────────────────────────────────────────────────
+  document.getElementById('copy-btn').addEventListener('click', () => {
+    const text = document.getElementById('result-text').textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.getElementById('copy-btn');
+      btn.textContent = 'Copied ✓';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    });
+  });
+
+  // ── Helpers ────────────────────────────────────────────────────────────────
+  function _setBusy(busy) {
+    transcribeBtn.disabled = busy || !selectedFile;
+    transcribeBtn.textContent = busy ? 'Transcribing…' : 'Transcribe';
+    document.getElementById('progress-wrap').classList.toggle('visible', busy);
+    if (!busy) { document.getElementById('progress-bar-fill').style.width = '0%'; }
+  }
+
+  function _setProgress(pct) {
+    document.getElementById('progress-bar-fill').style.width = `${pct}%`;
+    document.getElementById('progress-label').textContent = `${pct}%`;
+  }
+
+  function _setStatus(msg, type = '') {
+    const el = document.getElementById('status');
+    el.textContent = msg;
+    el.className = type;
+  }
+
+  function _showResult(text, lang, duration) {
+    document.getElementById('result-meta').textContent =
+      `language: ${lang}  ·  duration: ${duration}s`;
+    document.getElementById('result-text').textContent = text;
+    document.getElementById('result-wrap').classList.add('visible');
+  }
+</script>
+</body>
+</html>
