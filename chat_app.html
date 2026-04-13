@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chiana AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Nunito+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --yellow:   #FFD93D;
+  --orange:   #FF9A3C;
+  --blue:     #4A90D9;
+  --blue-lt:  #EBF4FF;
+  --green:    #6BCB77;
+  --red:      #FF6B6B;
+  --bg:       #FFF8EE;
+  --surface:  #FFFFFF;
+  --sidebar:  #F5EFE6;
+  --text:     #3A3A3A;
+  --muted:    #9A9A9A;
+  --border:   #EDE0CF;
+  --shadow:   rgba(0,0,0,0.08);
+  --sidebar-w: 260px;
+}
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image:
+    radial-gradient(circle, #FFD93D22 2px, transparent 2px),
+    radial-gradient(circle, #6BCB7722 2px, transparent 2px),
+    radial-gradient(circle, #4A90D922 2px, transparent 2px);
+  background-size: 60px 60px, 90px 90px, 120px 120px;
+  background-position: 0 0, 30px 30px, 60px 60px;
+  pointer-events: none; z-index: 0;
+}
+
+/* ── PIN SCREEN ── */
+#pin-screen {
+  position: fixed; inset: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--bg);
+}
+
+#pin-card {
+  width: 340px;
+  background: var(--surface);
+  border: 3px solid var(--yellow);
+  border-radius: 32px;
+  padding: 44px 32px 36px;
+  display: flex; flex-direction: column; align-items: center; gap: 20px;
+  animation: card-in 0.45s cubic-bezier(0.34,1.56,0.64,1) both;
+  box-shadow: 0 8px 32px var(--shadow), 0 0 0 6px #FFD93D22;
+}
+
+@keyframes card-in {
+  from { opacity:0; transform:translateY(28px) scale(0.93); }
+  to   { opacity:1; transform:translateY(0) scale(1); }
+}
+
+#pin-icon { font-size:56px; animation: float 3.5s ease-in-out infinite; line-height:1; }
+
+@keyframes float {
+  0%,100% { transform:translateY(0) rotate(-3deg); }
+  50%      { transform:translateY(-10px) rotate(3deg); }
+}
+
+#pin-title    { font-size:26px; font-weight:900; color:var(--blue); text-align:center; }
+#pin-subtitle { font-size:15px; color:var(--muted); font-weight:600; text-align:center; margin-top:-10px; }
+
+#pin-input-wrap {
+  width:100%; border-radius:16px; background:var(--blue-lt);
+  border:2px solid #C5DCEF; transition: border-color .2s, box-shadow .2s;
+}
+#pin-input-wrap:focus-within { border-color:var(--blue); box-shadow:0 0 0 4px #4A90D922; }
+
+#pin-input {
+  width:100%; background:transparent; border:none; color:var(--text);
+  font-family:'Nunito',sans-serif; font-size:28px; font-weight:800;
+  letter-spacing:0.3em; padding:14px 18px; outline:none; text-align:center;
+}
+#pin-input::placeholder { color:#C5DCEF; letter-spacing:0.15em; font-size:20px; }
+
+#pin-btn {
+  width:100%; padding:15px; border:none; border-radius:16px;
+  background:var(--yellow); color:#7A5200;
+  font-family:'Nunito',sans-serif; font-size:18px; font-weight:900;
+  cursor:pointer; transition: transform .15s, box-shadow .15s;
+  box-shadow: 0 4px 0 #E6B800, 0 6px 16px #FFD93D44;
+}
+#pin-btn:hover  { transform:translateY(-2px); box-shadow:0 6px 0 #E6B800, 0 10px 20px #FFD93D44; }
+#pin-btn:active { transform:translateY(2px);  box-shadow:0 2px 0 #E6B800; }
+#pin-btn:disabled { opacity:.5; cursor:default; transform:none; }
+
+#pin-error { font-size:14px; font-weight:700; color:var(--red); text-align:center; min-height:18px; }
+
+@keyframes shake {
+  0%,100% { transform:translateX(0); }
+  20%      { transform:translateX(-8px); }
+  40%      { transform:translateX(8px); }
+  60%      { transform:translateX(-5px); }
+  80%      { transform:translateX(5px); }
+}
+
+/* ── APP SHELL ── */
+#app { display:none; flex-direction:row; height:100%; position:relative; z-index:1; }
+
+/* ── SIDEBAR ── */
+#sidebar {
+  width: var(--sidebar-w);
+  background: var(--sidebar);
+  border-right: 2px solid var(--border);
+  display: flex; flex-direction: column;
+  flex-shrink: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+#sidebar-header {
+  padding: 16px 14px 12px;
+  border-bottom: 2px solid var(--border);
+  display: flex; flex-direction: column; gap: 10px;
+}
+
+#sidebar-brand {
+  display: flex; align-items: center; gap: 8px;
+}
+
+#sidebar-owl { font-size: 24px; animation: wiggle 4s ease-in-out infinite; }
+
+@keyframes wiggle {
+  0%,90%,100% { transform:rotate(0); }
+  93%          { transform:rotate(-12deg); }
+  96%          { transform:rotate(12deg); }
+}
+
+#sidebar-title { font-size:16px; font-weight:900; color:var(--blue); }
+
+#new-chat-btn {
+  width: 100%; padding: 10px; border: 2px dashed var(--border);
+  border-radius: 12px; background: transparent; color: var(--blue);
+  font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 700;
+  cursor: pointer; transition: background .15s, border-color .15s;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+#new-chat-btn:hover { background: var(--blue-lt); border-color: var(--blue); }
+
+#chat-list {
+  flex: 1; overflow-y: auto; padding: 8px 10px;
+  display: flex; flex-direction: column; gap: 4px;
+}
+
+#chat-list::-webkit-scrollbar { width: 4px; }
+#chat-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+.chat-item {
+  display: flex; align-items: center; gap: 6px;
+  padding: 9px 10px; border-radius: 10px;
+  cursor: pointer; transition: background .15s;
+  border: 2px solid transparent;
+  animation: pop-in 0.25s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+
+.chat-item:hover { background: #EDE0CF; }
+.chat-item.active { background: var(--surface); border-color: var(--border); }
+
+.chat-item-title {
+  flex: 1; font-size: 13px; font-weight: 700; color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.chat-item-delete {
+  width: 22px; height: 22px; border-radius: 6px; border: none;
+  background: transparent; color: var(--muted); font-size: 14px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; opacity: 0; transition: opacity .15s, background .15s, color .15s;
+}
+.chat-item:hover .chat-item-delete { opacity: 1; }
+.chat-item-delete:hover { background: #FFCACA; color: var(--red); }
+
+#sidebar-footer {
+  padding: 12px 14px;
+  border-top: 2px solid var(--border);
+}
+
+#logout-btn {
+  width: 100%; padding: 9px; border: 1.5px solid #FFCACA;
+  border-radius: 10px; background: #FFF0F0; color: var(--red);
+  font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 700;
+  cursor: pointer; transition: background .15s;
+}
+#logout-btn:hover { background: #FFE0E0; }
+
+/* ── MAIN AREA ── */
+#main {
+  flex: 1; display: flex; flex-direction: column; overflow: hidden;
+}
+
+#header {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 20px 12px;
+  background: var(--surface); border-bottom: 3px solid var(--yellow);
+  flex-shrink: 0; box-shadow: 0 2px 12px var(--shadow);
+}
+
+#hamburger {
+  display: none; background: none; border: none;
+  font-size: 22px; cursor: pointer; padding: 0 4px;
+}
+
+#header-title-area { display: flex; flex-direction: column; gap: 1px; }
+#header-title { font-size: 18px; font-weight: 900; color: var(--blue); line-height: 1.1; }
+#header-chat-title { font-size: 12px; font-weight: 600; color: var(--muted); max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+#status-pill {
+  margin-left: auto; display: flex; align-items: center; gap: 5px;
+  background: #EDFBF0; border: 1.5px solid #B8ECC1; border-radius: 20px;
+  padding: 4px 10px; font-size: 12px; font-weight: 700; color: #2E8B45;
+}
+#status-pill::before {
+  content:''; width:7px; height:7px; border-radius:50%;
+  background:var(--green); animation: blink 2s ease-in-out infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+/* ── CHAT AREA ── */
+#chat-area {
+  flex:1; overflow-y:auto; padding:20px 16px;
+  display:flex; flex-direction:column; gap:14px; scroll-behavior:smooth;
+}
+#chat-area::-webkit-scrollbar { width:5px; }
+#chat-area::-webkit-scrollbar-thumb { background:var(--border); border-radius:5px; }
+
+.bubble-wrap {
+  display:flex; flex-direction:column; max-width:80%;
+  animation: pop-in 0.3s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+@keyframes pop-in {
+  from { opacity:0; transform:translateY(10px) scale(0.95); }
+  to   { opacity:1; transform:translateY(0) scale(1); }
+}
+.bubble-wrap.user  { align-self:flex-end;  align-items:flex-end; }
+.bubble-wrap.ai    { align-self:flex-start; align-items:flex-start; }
+.bubble-wrap.error { align-self:flex-start; align-items:flex-start; }
+
+.bubble-sender { font-size:12px; font-weight:800; margin-bottom:4px; letter-spacing:.04em; text-transform:uppercase; }
+.bubble-wrap.user  .bubble-sender { color:var(--blue); }
+.bubble-wrap.ai    .bubble-sender { color:var(--orange); }
+.bubble-wrap.error .bubble-sender { color:var(--red); }
+
+.bubble { padding:13px 18px; font-size:16px; line-height:1.65; white-space:pre-wrap; word-break:break-word; font-weight:600; }
+.bubble-wrap.user  .bubble { background:var(--blue); color:white; border-radius:20px 20px 5px 20px; box-shadow:0 4px 12px #4A90D933; }
+.bubble-wrap.ai    .bubble { background:var(--surface); color:var(--text); border-radius:20px 20px 20px 5px; border:2px solid var(--border); box-shadow:0 4px 12px var(--shadow); }
+.bubble-wrap.error .bubble { background:#FFF0F0; color:var(--red); border:2px solid #FFCACA; border-radius:20px 20px 20px 5px; }
+
+.typing-bubble { display:flex; gap:6px; padding:16px 20px; align-items:center; }
+.typing-bubble span { width:9px; height:9px; border-radius:50%; background:var(--orange); animation:typing-bounce 1.3s ease-in-out infinite; }
+.typing-bubble span:nth-child(2) { animation-delay:.15s; background:var(--yellow); }
+.typing-bubble span:nth-child(3) { animation-delay:.30s; background:var(--green); }
+@keyframes typing-bounce { 0%,60%,100%{transform:translateY(0);opacity:.4} 30%{transform:translateY(-9px);opacity:1} }
+
+.session-divider { text-align:center; font-size:12px; font-weight:700; color:var(--muted); padding:6px 0 2px; letter-spacing:.08em; }
+
+/* ── EMPTY STATE ── */
+#welcome { text-align:center; padding:40px 20px; animation: fade-up .6s ease both; }
+@keyframes fade-up { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+#welcome .big-icon { font-size:64px; display:block; margin-bottom:16px; animation: float 3.5s ease-in-out infinite; }
+#welcome h2 { font-size:26px; font-weight:900; color:var(--blue); margin-bottom:8px; }
+#welcome p  { font-size:15px; font-weight:600; color:var(--muted); }
+
+/* ── INPUT BAR ── */
+#input-bar {
+  display:flex; gap:10px; padding:12px 16px 16px;
+  background:var(--surface); border-top:3px solid var(--border);
+  flex-shrink:0; align-items:flex-end;
+}
+#input-wrap { flex:1; border-radius:20px; background:var(--blue-lt); border:2px solid #C5DCEF; transition:border-color .2s,box-shadow .2s; }
+#input-wrap:focus-within { border-color:var(--blue); box-shadow:0 0 0 4px #4A90D918; }
+#user-input { width:100%; background:transparent; border:none; color:var(--text); font-family:'Nunito',sans-serif; font-size:17px; font-weight:600; padding:12px 18px; resize:none; outline:none; max-height:120px; overflow-y:auto; line-height:1.5; display:block; }
+#user-input::placeholder { color:#A8C8E8; font-weight:600; }
+
+#send-btn {
+  width:50px; height:50px; border-radius:50%; border:none; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  background:var(--yellow); box-shadow:0 4px 0 #E6B800;
+  transition:transform .12s, box-shadow .12s; position:relative; overflow:hidden;
+}
+#send-btn:hover:not(:disabled) { transform:translateY(-2px); box-shadow:0 6px 0 #E6B800; }
+#send-btn:active:not(:disabled){ transform:translateY(2px);  box-shadow:0 2px 0 #E6B800; }
+#send-btn:disabled { background:var(--border); box-shadow:none; cursor:default; }
+#send-btn svg { width:20px; height:20px; fill:#7A5200; position:relative; z-index:1; }
+
+.ripple { position:absolute; border-radius:50%; background:rgba(255,255,255,.5); transform:scale(0); animation:ripple-anim .5s linear; pointer-events:none; }
+@keyframes ripple-anim { to{transform:scale(3.5);opacity:0} }
+
+/* ── MOBILE ── */
+@media (max-width: 600px) {
+  :root { --sidebar-w: 240px; }
+  #sidebar { position:fixed; top:0; left:0; height:100%; z-index:50; transform:translateX(-100%); transition:transform .25s ease; box-shadow:4px 0 20px rgba(0,0,0,.12); }
+  #sidebar.open { transform:translateX(0); }
+  #sidebar-overlay { display:none; position:fixed; inset:0; z-index:49; background:rgba(0,0,0,.3); }
+  #sidebar-overlay.open { display:block; }
+  #hamburger { display:block; }
+}
+</style>
+</head>
+<body>
+
+<!-- PIN screen -->
+<div id="pin-screen">
+  <div id="pin-card">
+    <div id="pin-icon">🦉</div>
+    <div id="pin-title">Chiana AI</div>
+    <div id="pin-subtitle">Inserisci il tuo PIN per iniziare!</div>
+    <div id="pin-input-wrap">
+      <input id="pin-input" type="password" inputmode="numeric" maxlength="8" placeholder="••••" autocomplete="off">
+    </div>
+    <button id="pin-btn">INIZIA ✨</button>
+    <div id="pin-error"></div>
+  </div>
+</div>
+
+<!-- Sidebar overlay (mobile) -->
+<div id="sidebar-overlay"></div>
+
+<!-- App -->
+<div id="app">
+
+  <!-- Sidebar -->
+  <div id="sidebar">
+    <div id="sidebar-header">
+      <div id="sidebar-brand">
+        <span id="sidebar-owl">🦉</span>
+        <span id="sidebar-title">Chiana AI</span>
+      </div>
+      <button id="new-chat-btn">+ Nuova chat</button>
+    </div>
+    <div id="chat-list"></div>
+    <div id="sidebar-footer">
+      <button id="logout-btn">Esci</button>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div id="main">
+    <div id="header">
+      <button id="hamburger">☰</button>
+      <div id="header-title-area">
+        <div id="header-title">Chiana AI</div>
+        <div id="header-chat-title">La tua assistente scolastica</div>
+      </div>
+      <div id="status-pill">online</div>
+    </div>
+
+    <div id="chat-area">
+      <div id="welcome">
+        <span class="big-icon">📚</span>
+        <h2>Ciao! Sono Chiana 👋</h2>
+        <p>Crea una nuova chat per iniziare!</p>
+      </div>
+    </div>
+
+    <div id="input-bar">
+      <div id="input-wrap">
+        <textarea id="user-input" rows="1" placeholder="Scrivi la tua domanda…"></textarea>
+      </div>
+      <button id="send-btn" title="Invia">
+        <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const HARDCODED_URL = "https://blightingly-in-golly.ngrok-free.app";
+
+  let currentPin    = null;
+  let currentChatId = null;
+
+  const pinScreen    = document.getElementById("pin-screen");
+  const pinInput     = document.getElementById("pin-input");
+  const pinBtn       = document.getElementById("pin-btn");
+  const pinError     = document.getElementById("pin-error");
+  const appEl        = document.getElementById("app");
+  const sidebar      = document.getElementById("sidebar");
+  const overlay      = document.getElementById("sidebar-overlay");
+  const chatList     = document.getElementById("chat-list");
+  const newChatBtn   = document.getElementById("new-chat-btn");
+  const chatArea     = document.getElementById("chat-area");
+  const userInput    = document.getElementById("user-input");
+  const sendBtn      = document.getElementById("send-btn");
+  const logoutBtn    = document.getElementById("logout-btn");
+  const hamburger    = document.getElementById("hamburger");
+  const headerSub    = document.getElementById("header-chat-title");
+
+  // ── Mobile sidebar toggle ──────────────────────────────────────────────────
+  hamburger.addEventListener("click", () => {
+    sidebar.classList.toggle("open");
+    overlay.classList.toggle("open");
+  });
+  overlay.addEventListener("click", closeSidebar);
+  function closeSidebar() {
+    sidebar.classList.remove("open");
+    overlay.classList.remove("open");
+  }
+
+  // ── PIN ────────────────────────────────────────────────────────────────────
+  pinInput.addEventListener("keydown", e => { if (e.key === "Enter") submitPin(); });
+  pinBtn.addEventListener("click", submitPin);
+
+  async function submitPin() {
+    const pin = pinInput.value.trim();
+    if (!pin) return;
+    pinBtn.disabled = true;
+    pinError.textContent = "";
+    try {
+      const res  = await fetch(`${HARDCODED_URL}/validate`, {
+        method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({ pin })
+      });
+      const data = await res.json();
+      if (res.ok && data.valid) {
+        currentPin = pin;
+        pinScreen.style.display = "none";
+        appEl.style.display     = "flex";
+        await refreshChatList();
+      } else {
+        showPinError("PIN errato. Riprova! 🙈");
+        pinInput.value = "";
+      }
+    } catch { showPinError("Impossibile raggiungere il server."); }
+    finally  { pinBtn.disabled = false; }
+  }
+
+  function showPinError(msg) {
+    pinError.textContent = msg;
+    pinError.style.animation = "none";
+    pinError.offsetHeight;
+    pinError.style.animation = "shake 0.35s ease";
+  }
+
+  // ── Logout ─────────────────────────────────────────────────────────────────
+  logoutBtn.addEventListener("click", () => {
+    currentPin = null; currentChatId = null;
+    chatList.innerHTML = "";
+    clearChatArea();
+    appEl.style.display     = "none";
+    pinScreen.style.display = "flex";
+    pinInput.value = "";
+    pinError.textContent = "";
+  });
+
+  // ── Chat list ──────────────────────────────────────────────────────────────
+  async function refreshChatList() {
+    const res  = await fetch(`${HARDCODED_URL}/chats`, {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ pin: currentPin })
+    });
+    const data = await res.json();
+    renderChatList(data.chats || []);
+  }
+
+  function renderChatList(chats) {
+    chatList.innerHTML = "";
+    chats.forEach(chat => {
+      const item = document.createElement("div");
+      item.className = "chat-item" + (chat.id === currentChatId ? " active" : "");
+      item.dataset.id = chat.id;
+
+      const title = document.createElement("div");
+      title.className = "chat-item-title";
+      title.textContent = chat.title || "Nuova chat";
+
+      const del = document.createElement("button");
+      del.className = "chat-item-delete";
+      del.title = "Elimina";
+      del.textContent = "✕";
+      del.addEventListener("click", async e => {
+        e.stopPropagation();
+        await deleteChat(chat.id);
+      });
+
+      item.appendChild(title);
+      item.appendChild(del);
+      item.addEventListener("click", () => openChat(chat.id, chat.title));
+      chatList.appendChild(item);
+    });
+  }
+
+  // ── New chat ───────────────────────────────────────────────────────────────
+  newChatBtn.addEventListener("click", async () => {
+    const res  = await fetch(`${HARDCODED_URL}/new_chat`, {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ pin: currentPin })
+    });
+    const data = await res.json();
+    await refreshChatList();
+    openChat(data.chat_id, data.title);
+    closeSidebar();
+  });
+
+  // ── Open chat ──────────────────────────────────────────────────────────────
+  async function openChat(chatId, title) {
+    currentChatId = chatId;
+    headerSub.textContent = title || "Nuova chat";
+    clearChatArea();
+
+    // Mark active in sidebar
+    document.querySelectorAll(".chat-item").forEach(el => {
+      el.classList.toggle("active", el.dataset.id === chatId);
+    });
+
+    // Fetch and render history
+    try {
+      const res  = await fetch(`${HARDCODED_URL}/history`, {
+        method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({ pin: currentPin, chat_id: chatId })
+      });
+      const data = await res.json();
+      const msgs = data.messages || [];
+
+      if (msgs.length === 0) {
+        showWelcome();
+      } else {
+        msgs.forEach(m => {
+          if (m.role === "user")      addBubble("Tu", m.content, "user");
+          else if (m.role === "assistant") addBubble("Chiana AI", m.content, "ai");
+        });
+        scrollToBottom();
+      }
+    } catch { showWelcome(); }
+
+    userInput.focus();
+    closeSidebar();
+  }
+
+  // ── Delete chat ────────────────────────────────────────────────────────────
+  async function deleteChat(chatId) {
+    await fetch(`${HARDCODED_URL}/delete_chat`, {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ pin: currentPin, chat_id: chatId })
+    });
+    if (currentChatId === chatId) {
+      currentChatId = null;
+      clearChatArea();
+      showWelcome();
+      headerSub.textContent = "La tua assistente scolastica";
+    }
+    await refreshChatList();
+  }
+
+  // ── Chat area helpers ──────────────────────────────────────────────────────
+  function clearChatArea() { chatArea.innerHTML = ""; }
+
+  function showWelcome() {
+    chatArea.innerHTML = `
+      <div id="welcome">
+        <span class="big-icon">📚</span>
+        <h2>Ciao! Sono Chiana 👋</h2>
+        <p>Scrivi qualcosa per iniziare!</p>
+      </div>`;
+  }
+
+  function addBubble(sender, text, type = "ai") {
+    const welcome = document.getElementById("welcome");
+    if (welcome) welcome.remove();
+
+    const wrap       = document.createElement("div");
+    wrap.className   = `bubble-wrap ${type}`;
+    const senderEl   = document.createElement("div");
+    senderEl.className = "bubble-sender";
+    senderEl.textContent = sender;
+    const bubble     = document.createElement("div");
+    bubble.className = "bubble";
+    bubble.textContent = text;
+    wrap.appendChild(senderEl);
+    wrap.appendChild(bubble);
+    chatArea.appendChild(wrap);
+    return bubble;
+  }
+
+  function showTyping() {
+    const welcome = document.getElementById("welcome");
+    if (welcome) welcome.remove();
+    const wrap       = document.createElement("div");
+    wrap.className   = "bubble-wrap ai";
+    wrap.id          = "typing-indicator";
+    const senderEl   = document.createElement("div");
+    senderEl.className = "bubble-sender";
+    senderEl.textContent = "Chiana AI";
+    const dots       = document.createElement("div");
+    dots.className   = "bubble typing-bubble";
+    dots.innerHTML   = "<span></span><span></span><span></span>";
+    wrap.appendChild(senderEl);
+    wrap.appendChild(dots);
+    chatArea.appendChild(wrap);
+    scrollToBottom();
+  }
+
+  function hideTyping() {
+    const el = document.getElementById("typing-indicator");
+    if (el) el.remove();
+  }
+
+  function scrollToBottom() { chatArea.scrollTop = chatArea.scrollHeight; }
+  function setUIEnabled(on) { userInput.disabled = !on; sendBtn.disabled = !on; }
+
+  // ── Input ──────────────────────────────────────────────────────────────────
+  userInput.addEventListener("input", () => {
+    userInput.style.height = "auto";
+    userInput.style.height = Math.min(userInput.scrollHeight, 120) + "px";
+  });
+  userInput.addEventListener("keydown", e => {
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  });
+  sendBtn.addEventListener("click", e => {
+    const r = document.createElement("span");
+    r.className = "ripple";
+    const rect = sendBtn.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height);
+    r.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX-rect.left-size/2}px;top:${e.clientY-rect.top-size/2}px`;
+    sendBtn.appendChild(r);
+    r.addEventListener("animationend", () => r.remove());
+    sendMessage();
+  });
+
+  // ── Send ───────────────────────────────────────────────────────────────────
+  async function sendMessage() {
+    const message = userInput.value.trim();
+    if (!message || !currentPin || !currentChatId) return;
+
+    userInput.value = "";
+    userInput.style.height = "auto";
+    addBubble("Tu", message, "user");
+    scrollToBottom();
+    setUIEnabled(false);
+    showTyping();
+
+    try {
+      const res = await fetch(`${HARDCODED_URL}/chat`, {
+        method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({ message, pin: currentPin, chat_id: currentChatId })
+      });
+      hideTyping();
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
+        addBubble("Errore", err.error || `HTTP ${res.status}`, "error");
+        return;
+      }
+
+      const data = await res.json();
+      if (data.response) {
+        addBubble("Chiana AI", data.response, "ai");
+        scrollToBottom();
+      }
+      if (data.error) addBubble("Errore", data.error, "error");
+
+      // Update title in sidebar if the AI just generated it
+      if (data.title) {
+        headerSub.textContent = data.title;
+        // Update the item in the sidebar list
+        const item = chatList.querySelector(`[data-id="${currentChatId}"] .chat-item-title`);
+        if (item) item.textContent = data.title;
+      }
+
+    } catch (err) {
+      hideTyping();
+      addBubble("Errore",
+        err.name === "TypeError"
+          ? "Impossibile raggiungere il server.\nAssicurati che server.py sia in esecuzione."
+          : err.message, "error");
+    } finally {
+      setUIEnabled(true);
+      userInput.focus();
+    }
+  }
+</script>
+</body>
+</html>
