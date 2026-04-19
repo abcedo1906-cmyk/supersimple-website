@@ -433,6 +433,141 @@ body::before {
   .task-card-icon  { font-size: 26px; }
 }
 
+
+/* ── FILE UPLOAD AREA ── */
+#upload-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  max-width: 420px;
+  animation: fade-up .5s ease both;
+}
+
+#upload-area h3 {
+  font-size: 16px;
+  font-weight: 800;
+  color: #2E7A3C;
+  text-align: center;
+}
+
+#upload-area p {
+  font-size: 13px;
+  color: var(--muted);
+  font-weight: 600;
+  text-align: center;
+  margin-top: -8px;
+}
+
+#drop-zone {
+  width: 100%;
+  border: 3px dashed #B3E8BB;
+  border-radius: 20px;
+  background: #EDFBF0;
+  padding: 32px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: border-color .2s, background .2s, transform .15s;
+  text-align: center;
+}
+
+#drop-zone:hover, #drop-zone.dragover {
+  border-color: var(--green);
+  background: #D5F5DA;
+  transform: scale(1.02);
+}
+
+#drop-zone-icon { font-size: 40px; line-height: 1; }
+
+#drop-zone-label {
+  font-size: 14px;
+  font-weight: 700;
+  color: #2E7A3C;
+}
+
+#drop-zone-sub {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+#file-input { display: none; }
+
+#upload-btn {
+  width: 100%;
+  padding: 13px;
+  border: none;
+  border-radius: 14px;
+  background: var(--green);
+  color: white;
+  font-family: 'Nunito', sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 4px 0 #4CAF5A, 0 6px 16px #6BCB7744;
+  transition: transform .15s, box-shadow .15s, opacity .15s;
+  display: none;
+}
+
+#upload-btn:hover  { transform: translateY(-2px); box-shadow: 0 6px 0 #4CAF5A, 0 10px 20px #6BCB7744; }
+#upload-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #4CAF5A; }
+#upload-btn:disabled { opacity: .6; cursor: default; transform: none; }
+
+#selected-file {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  background: #D5F5DA;
+  border: 2px solid #B3E8BB;
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #2E7A3C;
+  width: 100%;
+}
+
+#upload-progress {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+#progress-bar-wrap {
+  width: 100%;
+  height: 8px;
+  background: #D5F5DA;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+#progress-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--green), #32D74B);
+  border-radius: 8px;
+  transition: width .3s ease;
+  animation: progress-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes progress-pulse {
+  0%,100% { opacity: 1; }
+  50%      { opacity: .7; }
+}
+
+#progress-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #2E7A3C;
+}
+
 </style>
 </head>
 <body>
@@ -766,12 +901,141 @@ body::before {
       const data = await res.json();
       if (res.ok) {
         setTaskBadge(taskId);
-        showWelcome(true);
-        userInput.focus();
+        if (taskId === "study") {
+          showUploadArea();
+        } else {
+          showWelcome(true);
+          userInput.focus();
+        }
       }
     } catch (e) {
       console.warn("Could not set task:", e);
     }
+  }
+
+  function showUploadArea() {
+    chatArea.innerHTML = `
+      <div id="welcome">
+        <span class="big-icon">📖</span>
+        <h2>Carica il materiale</h2>
+        <div id="upload-area">
+          <p>Carica il documento su cui vuoi essere interrogato</p>
+          <div id="drop-zone">
+            <div id="drop-zone-icon">📄</div>
+            <div id="drop-zone-label">Trascina il file qui oppure clicca</div>
+            <div id="drop-zone-sub">PDF · DOCX · TXT</div>
+          </div>
+          <input type="file" id="file-input" accept=".pdf,.docx,.txt">
+          <div id="selected-file">
+            <span>📎</span>
+            <span id="selected-file-name"></span>
+          </div>
+          <div id="upload-progress">
+            <div id="progress-bar-wrap"><div id="progress-bar"></div></div>
+            <div id="progress-label">Elaborazione in corso…</div>
+          </div>
+          <button id="upload-btn">Inizia interrogazione ✨</button>
+        </div>
+      </div>`;
+
+    const dropZone  = document.getElementById("drop-zone");
+    const fileInput = document.getElementById("file-input");
+    const uploadBtn = document.getElementById("upload-btn");
+    const selFile   = document.getElementById("selected-file");
+    const selName   = document.getElementById("selected-file-name");
+    let   chosenFile = null;
+
+    dropZone.addEventListener("click", () => fileInput.click());
+
+    dropZone.addEventListener("dragover", e => {
+      e.preventDefault();
+      dropZone.classList.add("dragover");
+    });
+    dropZone.addEventListener("dragleave", () => dropZone.classList.remove("dragover"));
+    dropZone.addEventListener("drop", e => {
+      e.preventDefault();
+      dropZone.classList.remove("dragover");
+      const f = e.dataTransfer.files[0];
+      if (f) setChosenFile(f);
+    });
+
+    fileInput.addEventListener("change", () => {
+      if (fileInput.files[0]) setChosenFile(fileInput.files[0]);
+    });
+
+    function setChosenFile(f) {
+      chosenFile = f;
+      selName.textContent = f.name;
+      selFile.style.display  = "flex";
+      uploadBtn.style.display = "block";
+      dropZone.querySelector("#drop-zone-label").textContent = "Cambia file";
+    }
+
+    uploadBtn.addEventListener("click", async () => {
+      if (!chosenFile) return;
+      uploadBtn.disabled = true;
+      selFile.style.display = "none";
+      dropZone.style.display = "none";
+
+      const progress = document.getElementById("upload-progress");
+      const bar      = document.getElementById("progress-bar");
+      const lbl      = document.getElementById("progress-label");
+      progress.style.display = "flex";
+
+      // Animate bar while waiting
+      let pct = 0;
+      const ticker = setInterval(() => {
+        pct = Math.min(pct + 2, 90);
+        bar.style.width = pct + "%";
+      }, 300);
+
+      try {
+        const form = new FormData();
+        form.append("pin",     currentPin);
+        form.append("chat_id", currentChatId);
+        form.append("file",    chosenFile);
+
+        const res  = await fetch(`${HARDCODED_URL}/upload_material`, {
+          method: "POST",
+          body:   form,
+        });
+        const data = await res.json();
+
+        clearInterval(ticker);
+        bar.style.width = "100%";
+
+        if (!res.ok) {
+          lbl.textContent = "Errore: " + (data.error || "Upload fallito.");
+          lbl.style.color = "var(--red)";
+          uploadBtn.disabled = false;
+          return;
+        }
+
+        // Update sidebar title
+        if (data.title) {
+          headerSub.textContent = data.title;
+          const item = chatList.querySelector(`[data-id="${currentChatId}"] .chat-item-title`);
+          if (item) item.textContent = data.title;
+        }
+
+        // Clear and show the first question
+        setTimeout(() => {
+          clearChatArea();
+          if (data.first_question) {
+            addBubble("Chiana AI", data.first_question, "ai");
+            scrollToBottom();
+          }
+          setUIEnabled(true);
+          userInput.focus();
+        }, 400);
+
+      } catch (err) {
+        clearInterval(ticker);
+        lbl.textContent = "Impossibile raggiungere il server.";
+        lbl.style.color = "var(--red)";
+        uploadBtn.disabled = false;
+      }
+    });
   }
 
   function setTaskBadge(taskId) {
