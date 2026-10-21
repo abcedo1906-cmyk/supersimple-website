@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Versio – traduci, ripeti, sali di livello</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;800;900&family=Noto+Serif:ital,wght@0,400;0,700;1,400&display=swap">
+<style>
+:root{--bg:#f6f2ff;--g1:#d9c8ff88;--g2:#bff3ea88;--card:#fff;--tx:#1d1640;--mu:#6b6595;--ln:#ddd5f5;--gold:#c98a00;--pk:#e0366f;--tl:#0b9c84;--vi:#6d3df0;--ok:#12a36b;--bad:#e5484d;--am:#d98200;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0d0a1f;--g1:#3b1d7a88;--g2:#0e6b7a55;--card:#1a1538;--tx:#f5f1ff;--mu:#a9a2d0;--ln:#2f2860;--gold:#ffc94d;--pk:#ff5d8f;--tl:#2ee6c5;--vi:#9b7bff;--ok:#3ddc97;--bad:#ff6b6b;--am:#ffb347}}
+:root[data-theme="dark"]{--bg:#0d0a1f;--g1:#3b1d7a88;--g2:#0e6b7a55;--card:#1a1538;--tx:#f5f1ff;--mu:#a9a2d0;--ln:#2f2860;--gold:#ffc94d;--pk:#ff5d8f;--tl:#2ee6c5;--vi:#9b7bff;--ok:#3ddc97;--bad:#ff6b6b;--am:#ffb347}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100vh;font:600 16px/1.5 Nunito,system-ui,sans-serif;color:var(--tx);background:radial-gradient(900px 500px at 10% -10%,var(--g1),transparent),radial-gradient(800px 500px at 100% 0,var(--g2),transparent),var(--bg)}
+#app{max-width:760px;margin:0 auto;padding:14px}
+header{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.logo{font-weight:900;font-size:1.5rem;margin-right:auto;background:linear-gradient(90deg,var(--gold),var(--pk));-webkit-background-clip:text;background-clip:text;color:transparent}
+#hud{display:flex;align-items:center;gap:8px}
+.chip{background:var(--card);border:1px solid var(--ln);border-radius:99px;padding:3px 11px;font-weight:900;font-size:.9rem;white-space:nowrap}
+.hot{border-color:var(--gold);color:var(--gold);animation:pl .7s infinite;--c:var(--gold)}
+.xp,.bar{height:10px;background:var(--ln);border-radius:9px;overflow:hidden}.xp{width:80px}.bar{margin:8px 0 14px}
+.xp i,.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--pk));border-radius:9px;transition:width .5s}
+h1,h2{margin:.3em 0}h2{font-size:1.1rem;margin-top:1.4em}.mu,small{color:var(--mu)}small{display:block}
+.hero{text-align:center;padding:10px 0 4px}.hero h1{font-size:2.4rem}
+.card{background:var(--card);border:1px solid var(--ln);border-radius:20px;padding:18px;margin:10px 0}
+.row{display:flex;justify-content:space-between;align-items:center;gap:12px}.row>div:first-child{flex:1}
+.btns{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px}
+button{font:inherit;font-weight:900;cursor:pointer;color:var(--tx)}
+.btn{background:linear-gradient(135deg,var(--vi),var(--pk));color:#fff;border:0;padding:13px 22px;border-radius:16px;box-shadow:0 5px 0 #0004;transition:transform .08s}
+.btn:active{transform:translateY(4px);box-shadow:0 1px 0 #0004}.btn:disabled{opacity:.4;cursor:not-allowed}
+.ghost,.ic{background:transparent;border:1px solid var(--ln);border-radius:14px;padding:10px 14px}.ic{padding:6px 10px;border-radius:99px}
+input[type=text],textarea{width:100%;font:600 15px/1.5 Nunito,sans-serif;color:var(--tx);background:transparent;border:1px solid var(--ln);border-radius:12px;padding:10px;resize:vertical}
+textarea{min-height:130px;font-family:"Noto Serif",serif;font-weight:400}label{display:block;font-weight:900;margin:12px 0 5px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:560px){.two{grid-template-columns:1fr}}
+.pills{display:flex;gap:8px}.pills label{margin:0;flex:1}.pills input{position:absolute;opacity:0}
+.pills span{display:block;text-align:center;padding:10px;border:2px solid var(--ln);border-radius:14px;cursor:pointer}
+.pills input:checked+span{border-color:var(--vi);background:var(--vi);color:#fff}
+.top2{display:flex;align-items:center;gap:10px;justify-content:space-between;flex-wrap:wrap}
+.big{padding:24px 20px;position:relative;border-width:2px}
+.orig{font:400 clamp(1.3rem,4.5vw,1.85rem)/1.55 "Noto Serif",Georgia,serif}
+.hint{margin-top:14px;color:var(--gold);font:700 1.05rem "Noto Serif",serif;letter-spacing:.04em}
+.sol{margin-top:16px;padding-top:14px;border-top:2px dashed var(--ln);color:var(--tl);font:400 italic 1.2rem/1.5 "Noto Serif",serif;animation:pop .35s}
+.q{margin:16px 0 6px;font-weight:900}.rt{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.rb{display:flex;flex-direction:column;align-items:flex-start;background:var(--card);border:2px solid var(--c);border-radius:16px;padding:10px 12px;text-align:left;transition:transform .1s}
+.rb:hover{transform:translateY(-2px)}.rb:active{transform:scale(.97)}.rb b{font-size:1.05rem}.rb small{color:var(--c)}
+.rb[data-k=p]{--c:var(--ok)}.rb[data-k=q]{--c:var(--tl)}.rb[data-k=d]{--c:var(--am)}.rb[data-k=s]{--c:var(--bad)}
+.p-p{--c:var(--ok);animation:pl .6s}.p-q{--c:var(--tl);animation:pl .6s}.p-d{--c:var(--am);animation:pl .6s}.p-s{--c:var(--bad);animation:pl .6s}
+@keyframes pl{0%{box-shadow:0 0 0 0 var(--c)}100%{box-shadow:0 0 0 22px #0000}}
+@keyframes pop{0%{opacity:0;transform:scale(.96)}100%{opacity:1;transform:none}}
+.fl{position:fixed;left:50%;top:36%;z-index:9;text-align:center;pointer-events:none;font-weight:900;font-size:2rem;color:var(--c);text-shadow:0 2px 12px #0006;animation:rise .95s forwards}.fl small{color:var(--tx);font-size:1rem}
+@keyframes rise{0%{opacity:0;transform:translate(-50%,10px) scale(.6)}20%{opacity:1;transform:translate(-50%,0) scale(1.15)}100%{opacity:0;transform:translate(-50%,-80px)}}
+#ts{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);left:50%;transform:translateX(-50%);z-index:20;display:grid;gap:8px;width:min(92vw,420px)}
+.t{background:var(--card);border:2px solid var(--gold);border-radius:14px;padding:10px 14px;box-shadow:0 8px 24px #0005;animation:pop .3s}
+.pr,.pgrid{display:grid;grid-template-columns:26px 1fr 1fr;gap:8px;margin:8px 0;align-items:start}.pgrid{font-weight:900;color:var(--mu)}.pr>b{padding-top:8px;color:var(--mu)}
+.pr textarea{min-height:64px;font-size:14px}.mini{display:flex;gap:4px;margin-top:4px}.mini button{background:none;border:1px solid var(--ln);border-radius:9px;padding:2px 8px;font-size:.78rem}.mini button:disabled{opacity:.3}
+.empty{color:var(--mu);padding:10px}.lb{display:none}
+@media(max-width:560px){.pr{grid-template-columns:1fr}.pgrid{display:none}.lb{display:block}.pr>b{padding:0}}
+.banner{padding:10px 14px;border-radius:14px;font-weight:900;border:2px solid}.banner.ok{border-color:var(--ok);color:var(--ok)}.banner.bad{border-color:var(--bad);color:var(--bad)}
+.res{text-align:center}.rk{font-size:4rem;animation:pop .6s}.res h1{font-size:2.4rem;background:linear-gradient(90deg,var(--gold),var(--pk));-webkit-background-clip:text;background-clip:text;color:transparent}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0}.stats div{border:1px solid var(--ln);border-radius:14px;padding:10px}.stats b{display:block;font-size:1.5rem;color:var(--gold)}
+.bd{display:inline-block;margin:4px;padding:5px 12px;border:2px solid var(--gold);border-radius:99px}
+#cv{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:8}.my{margin-top:16px;min-height:96px;font-family:'Noto Serif',serif;font-size:1.05rem;border:2px solid var(--vi);background:#9b7bff12}.my:focus{outline:0;box-shadow:0 0 0 4px #9b7bff55}.big{box-shadow:0 0 calc(var(--h,0)*6px) calc(var(--h,0)*1px) var(--gold);transition:box-shadow .4s}.cmp{margin-bottom:10px}.cmp small{font:900 .72rem Nunito,sans-serif;text-transform:uppercase;letter-spacing:.07em}.w1{color:var(--ok)}.w0{color:var(--mu);text-decoration:line-through}.w2{color:var(--am);border-bottom:2px dotted var(--am)}.sug{box-shadow:0 0 0 3px var(--c),0 0 22px var(--c);animation:gl .8s infinite alternate}@keyframes gl{to{transform:scale(1.04)}}.sol{animation:flip .5s}@keyframes flip{0%{opacity:0;transform:perspective(600px) rotateX(90deg)}100%{opacity:1;transform:none}}#app{padding-bottom:130px}.bot{width:100%;height:auto;display:block;animation:bob 2.4s ease-in-out infinite}@keyframes bob{50%{transform:translateY(-5px)}}.bot .eyes,.bot .mouth{transform-box:fill-box;transform-origin:center}.bot .eyes{animation:blk 4s infinite}@keyframes blk{0%,94%,100%{transform:scaleY(1)}97%{transform:scaleY(.1)}}.bot .ant{animation:ap 1s infinite alternate}@keyframes ap{to{fill:#ffc94d}}.bot.talk .mouth{animation:mt .16s infinite alternate}@keyframes mt{to{transform:scaleY(3.5)}}#ch{position:fixed;left:8px;bottom:calc(env(safe-area-inset-bottom,0px) + 8px);z-index:7;display:flex;align-items:flex-end;gap:6px;pointer-events:none}#ch .bot{width:70px;pointer-events:auto;cursor:pointer}.bub{max-width:min(260px,62vw);background:var(--card);color:var(--tx);border:2px solid var(--vi);border-radius:16px 16px 16px 4px;padding:8px 12px;font-weight:800;font-size:.9rem;box-shadow:0 6px 18px #0004}#tu{position:fixed;inset:0;z-index:15;background:var(--bg);display:grid;place-items:center;padding:16px;overflow:auto}.tub{max-width:460px;width:100%;text-align:center}.tub .bot{width:150px;margin:0 auto}.tub .bub{max-width:none;border-radius:18px;margin:10px 0 14px;font-size:1.05rem;min-height:3.6em}@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div id="app">
+<header><div class="logo">Versio</div><div id="hud"></div></header>
+<main id="view"></main>
+</div>
+<div id="ts"></div><canvas id="cv"></canvas><div id="ch"></div>
+<script>
+const $=s=>document.querySelector(s),V=$("#view");
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let store={p:{xp:0,streak:0,last:"",badges:{},snd:true},t:[]},G=null,D=null;
+try{const r=localStorage.getItem("versio");if(r)store=Object.assign(store,JSON.parse(r))}catch(e){}
+const save=()=>{try{localStorage.setItem("versio",JSON.stringify(store))}catch(e){}};
+const lvl=x=>Math.floor(Math.sqrt(x/40))+1,mul=c=>Math.min(1+.5*Math.floor(c/3),4);
+const newSt=n=>({seen:Array(n).fill(0),tr:Array(n).fill(0),fp:0,reps:0,xp:0,best:0,done:0});
+const shuf=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const split=s=>(s.replace(/\s+/g," ").trim().match(/[^.?!;\u037e]+[.?!;\u037e]*["»”’)\]]*/g)||[]).map(x=>x.trim()).filter(Boolean);
+const BD={first:["Prima gloria","il tuo primo Perfetto"],c5:["Combo ×5","cinque Perfetti in combo"],c10:["Inarrestabile","combo da dieci"],stub:["Ostinato","frase domata dopo 3 errori"],clean:["Senza macchia","testo finito senza ripetizioni"],lv5:["Livello 5","sei salito al livello 5"],fire:["Fiamma viva","3 giorni di fila"],mar:["Maratoneta","25 frasi in una sessione"]};
+const PR={p:["Ottimo!","Magnifico!","Eccellente!","Ave, magister!","Impeccabile!"],q:["Ci sei quasi!","Quasi perfetta!"],d:["Una parola sola: ripassa!","Tienila a mente!"],s:["Si impara sbagliando.","Tornerà: la domerai!"]};
+/* audio + haptics */
+let AC;function tone(f,d=.12,ty="triangle",at=0,v=.14){if(!store.p.snd)return;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain(),t=AC.currentTime+at;o.type=ty;o.frequency.value=f;g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g);g.connect(AC.destination);o.start(t);o.stop(t+d)}catch(e){}}
+const seq=(a,d=.09,ty)=>a.forEach((f,i)=>tone(f,d*1.7,ty,i*d));
+const vib=p=>{try{navigator.vibrate&&navigator.vibrate(p)}catch(e){}};
+function toast(m){const e=document.createElement("div");e.className="t";e.innerHTML=m;$("#ts").append(e);setTimeout(()=>e.remove(),2900)}
+const cv=$('#cv'),cx=cv.getContext('2d');let PS=[],raf=0;const RM=matchMedia('(prefers-reduced-motion:reduce)').matches;function sz(){cv.width=innerWidth;cv.height=innerHeight}sz();onresize=sz;function boom(n=60,x=innerWidth/2,y=innerHeight*.45,pw=1){if(RM)return;const C=['#ffc94d','#ff5d8f','#2ee6c5','#9b7bff','#3ddc97'];for(let i=0;i<n;i++){const a=Math.random()*6.28,v=(3+Math.random()*9)*pw;PS.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-5,r:3+Math.random()*5,c:C[i%5],l:70+Math.random()*40,t:Math.random()*6})}if(!raf)raf=requestAnimationFrame(tick)}function tick(){cx.clearRect(0,0,cv.width,cv.height);PS=PS.filter(p=>p.l>0);PS.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.35;p.vx*=.99;p.l--;p.t+=.2;cx.globalAlpha=Math.min(1,p.l/30);cx.fillStyle=p.c;cx.save();cx.translate(p.x,p.y);cx.rotate(p.t);cx.fillRect(-p.r,-p.r/2,p.r*2,p.r);cx.restore()});raf=PS.length?requestAnimationFrame(tick):0;if(!raf)cx.clearRect(0,0,cv.width,cv.height)}function shake(){if(!RM)$('#app').animate([{transform:'translateX(0)'},{transform:'translateX(-9px)'},{transform:'translateX(9px)'},{transform:'translateX(-5px)'},{transform:'none'}],{duration:320})}const nw=s=>s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');function cmp(){const o=G.t.ita[G.q[0]],m=(G.my||'').trim();if(m.length<3)return null;const ms=new Set(nw(m).match(/\p{L}+/gu)||[]),os=new Set(nw(o).match(/\p{L}+/gu)||[]),col=(s,set,ok,ko)=>s.split(/(\p{L}+)/u).map(p=>/\p{L}/u.test(p)?`<span class=${set.has(nw(p))?ok:ko}>${esc(p)}</span>`:esc(p)).join('');let hit=0;os.forEach(w=>{if(ms.has(w))hit++});const r=hit/(os.size||1);return{r,hit,tot:os.size,g:r>=.85?'p':r>=.6?'q':r>=.3?'d':'s',mine:col(m,os,'w1','w0'),off:col(o,ms,'w1','w2')}}let TU=0,TM='',TT,HT;const pick=a=>a[Math.floor(Math.random()*a.length)];const bot=()=>`<svg class=bot viewBox='0 0 100 110'><line x1=50 y1=10 x2=50 y2=22 stroke=#9b7bff stroke-width=3 /><circle class=ant cx=50 cy=8 r=6 fill=#ff5d8f /><rect x=18 y=22 width=64 height=48 rx=16 fill=#c9bfff stroke=#6d3df0 stroke-width=3 /><rect x=26 y=31 width=48 height=30 rx=10 fill=#1a1538 /><g class=eyes><circle cx=40 cy=44 r=6 fill=#2ee6c5 /><circle cx=60 cy=44 r=6 fill=#2ee6c5 /></g><rect class=mouth x=42 y=53 width=16 height=3 rx=1.5 fill=#ffc94d /><rect x=30 y=74 width=40 height=28 rx=10 fill=#9b7bff stroke=#6d3df0 stroke-width=3 /><circle cx=50 cy=88 r=5 fill=#ffc94d /><rect x=8 y=78 width=16 height=9 rx=4.5 fill=#c9bfff /><rect x=76 y=78 width=16 height=9 rx=4.5 fill=#c9bfff /></svg>`;
+function talk(el,txt,rb){clearInterval(TT);const a=[...txt];let i=0;el.hidden=false;el.textContent='';rb.classList.add('talk');TT=setInterval(()=>{el.textContent=a.slice(0,++i).join('');if(i%2==0)tone(260+Math.random()*420,.04,'square',0,.04);if(i>=a.length){clearInterval(TT);rb.classList.remove('talk')}},32)}
+function say(t,ms=3500){const b=$('#cb');if(!b||$('#tu'))return;clearTimeout(HT);talk(b,t,$('#ch .bot'));HT=setTimeout(()=>b.hidden=true,ms+t.length*32)}
+const CHL=['Dum spiro, spero… e ricarico le batterie! Beep.','Il latino non è morto: sta solo facendo l’aggiornamento!','Ho due hobby: tradurre e cercare il mio cavo di ricarica.','Errare humanum est. Errare robotum est… un bug!','Clicca pure: mi fai il solletico ai circuiti!'];
+const RL={p:['Beep! Perfetto!','Sei una macchina! Ma più simpatica di me.','Ave, magister! Tradotta alla grande!','Il mio cuore di silicio fa boom!'],q:['Quasi! Un ultimo sforzo, umano!','Vicinissimo: la rivedremo tra poco!'],d:['Una parolina fa la differenza: ripassiamola!','Capita! Nemmeno io ricordo tutto: ho solo 64 KB… scherzo!'],s:['Uh-oh! Succede ai migliori. Tornerà e la domerai!','Errore 404: traduzione non trovata. La ritroveremo!']};
+function react(k,lucky){let m=pick(RL[k]);if(lucky)m='🍀 Fortuna doppia! Il mio sensore del colpo di fortuna è impazzito!';else if(k=='p'&&G.combo>=3&&G.combo%3==0)m='COMBO ×'+mul(G.combo)+'! Sto surriscaldando le ventole! 🔥';say(m)}
+const TL=[['Beep-boop! Sono Chiana, il tuo robot-tutor! Ti insegno a tradurre senza sbadigliare. Pronto a una prova?',''],['Ti mostro una frase alla volta. Proviamo con Catullo: traduci «Odi et amo.» Scrivi qui sotto, anche a caso: nessuno ti giudica!','type'],['Ecco il confronto! Le parole verdi le hai azzeccate, quelle sottolineate ti sono sfuggite. Ora valuta onestamente come è andata!','rate'],['Ogni voto dà XP. Ma solo i Perfetto fanno sparire la frase: le altre tornano! E più Perfetti di fila fai, più la combo moltiplica i punti. 🔥',''],['Se sei bloccato, il suggerimento svela una lettera per parola (−5 XP). Con medaglie, livelli e gradi finali puoi diventare un vero Princeps!',''],['Per iniziare: incolla il testo originale e la traduzione, controlla l’anteprima e gioca! Io resto nell’angolo a fare il tifo. Pronto?','']];
+function tut(){const o=document.createElement('div');o.id='tu';o.innerHTML=`<div class=tub>${bot()}<div class=bub id=tb></div><div id=tx></div></div>`;document.body.append(o);$('#ch').hidden=true;TU=0;seq([300,400,300,500],.07,'square');step()}
+function step(){const t=TL[TU],x=$('#tx'),last=TU==TL.length-1;talk($('#tb'),t[0],$('#tu .bot'));let u='';if(t[1]=='type')u=`<div class=card style='text-align:left'><div class=orig>Odi et amo.</div><textarea id=tm class=my placeholder='Scrivi qui la tua traduzione…'></textarea></div><div class=btns style='justify-content:center'><button class=btn onclick=tg()>Rivela ▶</button></div>`;else if(t[1]=='rate'){const f=G;G={t:{ita:['Odio e amo.']},q:[0],my:TM};const c=cmp();G=f;u=`<div class=card style='text-align:left'><div class=cmp><small>La tua traduzione</small>${c?c.mine:'—'}</div><div class=cmp><small>Ufficiale</small>${c?c.off:'Odio e amo.'}</div></div><div class=rt>${[['p','Perfetto'],['q','Quasi'],['d','Mi ero dimenticato una parola'],['s','Sbagliato']].map(r=>`<button class=rb data-k=${r[0]} onclick=tr('${r[0]}')><b>${r[1]}</b></button>`).join('')}</div>`}else u=`<div class=btns style='justify-content:center'><button class=btn onclick=${last?'endTut()':'TU++;step()'}>${last?'Iniziamo! 🚀':'Avanti ▶'}</button></div>`;x.innerHTML=u+`<button class=ghost style='margin-top:12px' onclick=endTut()>Salta il tutorial</button>`}
+function tg(){TM=$('#tm').value;seq([392,523,659],.06);TU=2;step()}
+function tr(k){boom(k=='p'?100:35,innerWidth/2,innerHeight*.5,.9);seq(k=='p'?[523,659,784,1047]:[330,392],.08);TU=3;step()}
+function endTut(){const o=$('#tu');if(o)o.remove();clearInterval(TT);$('#ch').hidden=false;store.p.tut=1;save();boom(90);say('Eccomi! D’ora in poi ti faccio il tifo da qui. Cliccami se vuoi sentire una battuta!',4500)}
+function hud(){const x=store.p.xp,L=lvl(x),lo=40*(L-1)**2,hi=40*L*L;
+$("#hud").innerHTML=`<span class=chip>🔥 ${store.p.streak}</span><span class=chip>Lv ${L}</span><div class=xp><i style="width:${(x-lo)/(hi-lo)*100}%"></i></div><span class=chip>${x} XP</span><button class=ic onclick=tut() title='Tutorial con Chiana'>🤖</button><button id=mute class=ic>${store.p.snd?"🔊":"🔇"}</button>`;
+$("#mute").onclick=()=>{store.p.snd=!store.p.snd;save();hud();tone(660,.08)}}
+/* home + setup */
+function home(){G=null;D=null;let h=`<section class=hero><h1>Versio</h1><p class=mu>Traduci. Confronta. Ripeti finché ogni frase è tua.</p></section>`;
+if(store.t.length)h+=`<h2>I tuoi testi</h2>`+store.t.map(t=>{const m=t.m.filter(Boolean).length,n=t.lat.length;return `<div class="card row"><div><b>${esc(t.title)}</b><small>${m}/${n} frasi padroneggiate</small><div class=bar style="margin:6px 0 0"><i style="width:${m/n*100}%"></i></div></div><div class=btns style="margin:0"><button class=btn onclick="play('${t.id}')">${m==n?"Rifai":m?"Continua":"Inizia"}</button><button class=ic onclick="del('${t.id}')" title="Elimina">🗑</button></div></div>`}).join("");
+h+=`<h2>Nuovo testo</h2><div class=card><label for=ti>Titolo (facoltativo)</label><input type=text id=ti placeholder="Es. Catullo, carme 85"><div class=two><div><label for=la>Testo originale (latino o greco)</label><textarea id=la placeholder="Incolla qui il testo originale…"></textarea></div><div><label for=it>Traduzione italiana</label><textarea id=it placeholder="Incolla qui la traduzione…"></textarea></div></div><label>Ordine delle frasi</label><div class=pills><label><input type=radio name=o value=rand checked><span>🎲 Casuale</span></label><label><input type=radio name=o value=seq><span>📖 In sequenza</span></label></div><div class=btns><button class=btn onclick=go()>Anteprima →</button><button class=ghost onclick=ex()>Carica un esempio</button></div></div>`;
+V.innerHTML=h;hud()}
+function ex(){$("#ti").value="Catullo, carme 85";$("#la").value="Odi et amo. Quare id faciam, fortasse requiris. Nescio, sed fieri sentio et excrucior.";$("#it").value="Odio e amo. Perché io faccia questo, forse mi chiedi. Non lo so, ma sento che accade e mi tormento."}
+function del(id){if(confirm("Eliminare questo testo e i suoi progressi?")){store.t=store.t.filter(t=>t.id!=id);save();home()}}
+function go(){const a=split($("#la").value),b=split($("#it").value);if(!a.length||!b.length){toast("Incolla sia il testo originale sia la traduzione.");return}
+D={title:$("#ti").value.trim()||"Testo del "+new Date().toLocaleDateString("it-IT"),ord:document.querySelector("input[name=o]:checked").value,lat:a,ita:b};prev()}
+/* preview / alignment */
+const fit=a=>{a.style.height="auto";a.style.height=Math.max(64,a.scrollHeight+2)+"px"};
+function cell(k,i){const L=k=="lat"?"Originale":"Traduzione";return `<div><small class=lb>${L}</small>`+(i<D[k].length?`<textarea data-k=${k} data-i=${i}>${esc(D[k][i])}</textarea><div class=mini><button ${i?"":"disabled"} onclick="mg('${k}',${i})">⤴ unisci</button><button onclick="sp('${k}',${i})">✂ dividi</button><button onclick="rm('${k}',${i})">✕</button></div>`:`<div class=empty>—</div>`)+`</div>`}
+function prev(){const n=Math.max(D.lat.length,D.ita.length),ok=D.lat.length==D.ita.length&&n>0;let r="";for(let i=0;i<n;i++)r+=`<div class=pr><b>${i+1}</b>${cell("lat",i)}${cell("ita",i)}</div>`;
+V.innerHTML=`<h2>Anteprima</h2><p class=mu>Ogni frase originale deve avere accanto la sua traduzione. Se i testi non combaciano, <b>unisci</b> una frase alla precedente, <b>dividila</b> dove hai messo il cursore, oppure eliminala.</p><div class="banner ${ok?"ok":"bad"}">Originale: ${D.lat.length} · Traduzione: ${D.ita.length} ${ok?"✓ perfetto, si può partire":"— i numeri devono coincidere"}</div><div class=pgrid><span></span><span>Originale</span><span>Traduzione</span></div>${r}<div class=btns><button class=ghost onclick=home()>← Indietro</button><button class=btn ${ok?"":"disabled"} onclick=start()>Inizia a giocare</button></div>`;
+document.querySelectorAll(".pr textarea").forEach(a=>{fit(a);a.oninput=()=>{D[a.dataset.k][+a.dataset.i]=a.value;fit(a)}})}
+function mg(k,i){D[k][i-1]=D[k][i-1]+" "+D[k][i];D[k].splice(i,1);prev()}
+function rm(k,i){D[k].splice(i,1);prev()}
+function sp(k,i){const e=document.querySelector(`textarea[data-k=${k}][data-i="${i}"]`),p=e.selectionStart,v=e.value;if(!p||p>=v.length){toast("Metti il cursore nel punto in cui vuoi dividere.");return}D[k].splice(i,1,v.slice(0,p).trim(),v.slice(p).trim());prev()}
+function start(){const t={id:Date.now().toString(36),title:D.title,ord:D.ord,lat:D.lat.map(s=>s.trim()),ita:D.ita.map(s=>s.trim()),m:D.lat.map(()=>0),st:newSt(D.lat.length)};store.t.push(t);save();play(t.id)}
+/* practice */
+function play(id){const t=store.t.find(x=>x.id==id);if(t.m.every(Boolean)){t.m=t.m.map(()=>0);t.st=newSt(t.m.length)}
+let q=t.m.map((m,i)=>m?-1:i).filter(i=>i>=0);if(t.ord=="rand")shuf(q);G={t,q,rev:0,hint:0,combo:0,n:0,lock:0,newB:[],my:"",c:null};say('Si parte! Scrivi, rivela, valuta: io faccio il tifo per te!');card()}
+function card(){const t=G.t;if(!G.q.length)return done();const i=G.q[0],m=t.m.filter(Boolean).length;
+V.innerHTML=`<div class=top2><button class=ghost onclick=home()>← Esci</button><span class=mu>Frase ${i+1} di ${t.lat.length}</span>${G.combo>1?`<span class="chip hot">Combo ${G.combo} · ×${mul(G.combo)}</span>`:""}</div><div class=bar><i style="width:${m/t.lat.length*100}%"></i></div><div class="card big" id=cd><div class=orig>${esc(t.lat[i])}</div><div id=hn class=hint></div><div id=sol class=sol hidden>${esc(t.ita[i])}</div><div id=act></div></div><p class=mu style="text-align:center;font-size:.85rem">Scrivi la tua traduzione, poi rivela: ogni tentativo scritto vale +5 XP. Ctrl+Invio = rivela · 1–4 = valuta</p>`;act();$("#cd").style.setProperty("--h",Math.min(G.combo,10));$("#my")&&$("#my").focus()}
+function act(){const a=$("#act");if(!G.rev){a.innerHTML=`<textarea id=my class=my placeholder="✍️ Scrivi qui la tua traduzione… (facoltativo, ma ogni parola giusta si illumina!)" oninput="G.my=this.value;tone(700+Math.random()*300,.03,'square',0,.025)">${esc(G.my||"")}</textarea><div class=btns><button class=ghost onclick=hint() ${G.hint>=3?"disabled":""}>💡 Suggerimento −5 XP</button><button class=btn onclick=reveal()>Rivela la traduzione</button></div>`}
+else a.innerHTML=`<div class=q>Com’è andata la tua traduzione?</div><div class=rt>${[["p","🏆 Perfetto","+30 XP"],["q","👍 Quasi","+15 XP"],["d","🤔 Mi ero dimenticato una parola","+8 XP"],["s","❌ Sbagliato","+2 XP"]].map((r,n)=>`<button class="rb${G.c&&G.c.g==r[0]?" sug":""}" data-k=${r[0]} onclick="rate('${r[0]}')"><b>${r[1]}</b><small>${r[2]} · tasto ${n+1}</small></button>`).join("")}</div>`}
+function reveal(){G.rev=1;const c=G.c=cmp(),s=$("#sol");s.innerHTML=c?`<div class=cmp><small>La tua traduzione</small>${c.mine}</div><div class=cmp><small>Ufficiale · parole in comune ${c.hit}/${c.tot}</small>${c.off}</div><small>✨ Il confronto suggerisce: ${{p:"Perfetto",q:"Quasi",d:"Mi ero dimenticato una parola",s:"Sbagliato"}[c.g]} (conta solo le parole, non il senso: decidi tu!)</small>`:esc(G.t.ita[G.q[0]]);s.hidden=false;$("#hn").hidden=true;act();seq([392,523,659],.06);vib(12);if(c&&c.r>=.85)boom(35,innerWidth/2,innerHeight*.4,.7)}
+function hint(){if(G.hint>=3)return;G.hint++;store.p.xp=Math.max(0,store.p.xp-5);save();hud();const k=G.hint;
+$("#hn").textContent=G.t.ita[G.q[0]].split(" ").map(w=>w.replace(/./gu,(c,j)=>j<k||!/\p{L}/u.test(c)?c:"•")).join(" ");tone(440,.07);act();$("#my")&&$("#my").focus()}
+function rate(k){if(!G||!G.rev||G.lock)return;G.lock=1;const t=G.t,s=t.st,i=G.q.shift(),first=!s.seen[i];s.seen[i]=1;
+const base={p:30,q:15,d:8,s:2}[k]+(first&&k=="p"?10:0)+((G.my||"").trim().length>2?5:0);if(k=="p")G.combo++;else if(k!="q")G.combo=0;
+let g=Math.round(base*mul(G.combo));const lucky=k=="p"&&Math.random()<.2;if(lucky)g*=2;const L0=lvl(store.p.xp);store.p.xp+=g;s.xp+=g;G.n++;s.best=Math.max(s.best,G.combo);
+if(k=="p"){t.m[i]=1;s.done++;if(first)s.fp++;if(s.tr[i]>=3)award("stub")}
+else{s.tr[i]++;s.reps++;const pos=t.ord=="rand"?Math.min(G.q.length,2+Math.floor(Math.random()*4)):G.q.length;G.q.splice(pos,0,i)}
+const T=new Date(),dy=x=>x.getFullYear()+"-"+(x.getMonth()+1)+"-"+x.getDate(),p=store.p;if(p.last!=dy(T)){p.streak=p.last==dy(new Date(Date.now()-864e5))?p.streak+1:1;p.last=dy(T)}
+const msg=PR[k][Math.floor(Math.random()*PR[k].length)],f=document.createElement("div");f.className="fl";f.style.setProperty("--c",{p:"var(--ok)",q:"var(--tl)",d:"var(--am)",s:"var(--bad)"}[k]);f.innerHTML=`${lucky?"🍀 FORTUNATO ×2<br>":""}${msg}<small>+${g} XP${mul(G.combo)>1?" · ×"+mul(G.combo):""}</small>`;document.body.append(f);setTimeout(()=>f.remove(),1000);
+$("#cd").classList.add("p-"+k);react(k,lucky);
+if(k=="p"){const b=330*Math.pow(1.0595,Math.min(G.combo,12));seq([b,b*1.25,b*1.5,b*2],.07);vib(G.combo>2?[20,30,20,30,40]:[25]);award("first");boom(30+G.combo*12+(lucky?90:0),innerWidth/2,innerHeight*.4,1+Math.min(G.combo,8)/10);if(G.combo>=3&&G.combo%3==0){shake();toast(`🔥 <b>Combo ×${mul(G.combo)}!</b><small>${G.combo} di fila: non fermarti</small>`)}if(G.combo>=5)award("c5");if(G.combo>=10)award("c10")}
+else if(k=="q"){seq([440,554],.09);vib(20)}else if(k=="d"){tone(300,.18,"sine");vib(30)}else{tone(180,.25,"sawtooth",0,.08);vib([60,40,60]);shake()}
+if(G.n>=25)award("mar");if(p.streak>=3)award("fire");const L1=lvl(p.xp);
+if(L1>L0){setTimeout(()=>{toast(`⬆️ <b>Livello ${L1}!</b> Continua così.`);boom(220,innerWidth/2,innerHeight*.5,1.7);say('LIVELLO '+L1+'! Mi vengono i brividi nei servomotori!',4500);seq([523,659,784,1047,1319,1568],.08);vib([40,30,40,30,90])},350);if(L1>=5)award("lv5")}
+save();hud();setTimeout(()=>{G.lock=0;G.rev=0;G.hint=0;G.my="";G.c=null;card()},k=="p"?700:520)}
+function award(id){if(store.p.badges[id])return;store.p.badges[id]=1;if(G)G.newB.push(id);save();setTimeout(()=>{toast(`🏅 <b>${BD[id][0]}</b><small>${BD[id][1]}</small>`);seq([784,988,1175,1568],.08)},id=="first"?450:250)}
+/* results */
+function done(){const t=G.t,s=t.st,n=t.lat.length,acc=Math.round(s.fp/n*100),R=[[95,"Princeps","👑"],[80,"Philologus","🏛️"],[60,"Magister","🎓"],[40,"Interpres","📜"],[20,"Discipulus","✏️"],[0,"Tiro","🌱"]].find(r=>acc>=r[0]);
+if(!s.reps)award("clean");save();hud();seq([523,659,784,1047,1319],.12);vib([40,40,90]);boom(220,innerWidth*.3,innerHeight*.4,1.5);setTimeout(()=>boom(220,innerWidth*.7,innerHeight*.4,1.5),300);say(s.reps?'Missione compiuta! Con qualche ripasso in più diventi un '+R[1]+'!':'ZERO ripetizioni?! Sono… senza parole. Beep.',6000);
+V.innerHTML=`<div class="card res"><div class=rk>${R[2]}</div><small>Il tuo grado</small><h1>${R[1]}</h1><p class=mu>${esc(t.title)} completato!</p><div class=stats><div><b>${acc}%</b>Perfetti al primo colpo</div><div><b>${s.reps}</b>Hai dovuto ripetere le frasi ${s.reps} ${s.reps==1?"volta":"volte"}</div><div><b>${s.xp}</b>XP guadagnati</div><div><b>×${s.best}</b>Combo massima</div></div>${G.newB.length?`<h2>Nuove medaglie</h2>`+G.newB.map(b=>`<span class=bd>🏅 ${BD[b][0]}</span>`).join(""):""}<div class=btns style="justify-content:center"><button class=btn onclick="play('${t.id}')">Rifai da capo</button><button class=ghost onclick=home()>I miei testi</button></div></div>`}
+document.onkeydown=e=>{if(G&&!G.rev&&e.target.id=="my"&&(e.ctrlKey||e.metaKey)&&e.key=="Enter"){e.preventDefault();reveal();return}if(!G||!$("#cd")||/TEXTAREA|INPUT/.test(e.target.tagName))return;if(!G.rev){if(e.key==" "||e.key=="Enter"){e.preventDefault();reveal()}else if(e.key.toLowerCase()=="h")hint()}else{const k={1:"p",2:"q",3:"d",4:"s"}[e.key];if(k)rate(k)}};
+$('#ch').innerHTML=bot()+'<div class=bub id=cb hidden></div>';$('#ch .bot').onclick=()=>say(pick(CHL));hud();home();if(!store.p.tut)setTimeout(tut,500);
+</script>
+</body>
+</html>
