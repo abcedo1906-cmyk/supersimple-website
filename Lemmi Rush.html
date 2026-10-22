@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Lemmi Rush – ripassa i lemmi latini</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;800;900&family=Noto+Serif:ital,wght@0,400;0,700;1,400&display=swap">
+<style>
+:root{--bg:#f6f2ff;--g1:#d9c8ff88;--g2:#bff3ea88;--card:#fff;--tx:#1d1640;--mu:#6b6595;--ln:#ddd5f5;--gold:#c98a00;--pk:#e0366f;--tl:#0b9c84;--vi:#6d3df0;--ok:#12a36b;--bad:#e5484d;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0d0a1f;--g1:#3b1d7a88;--g2:#0e6b7a55;--card:#1a1538;--tx:#f5f1ff;--mu:#a9a2d0;--ln:#2f2860;--gold:#ffc94d;--pk:#ff5d8f;--tl:#2ee6c5;--vi:#9b7bff;--ok:#3ddc97;--bad:#ff6b6b}}
+:root[data-theme="dark"]{--bg:#0d0a1f;--g1:#3b1d7a88;--g2:#0e6b7a55;--card:#1a1538;--tx:#f5f1ff;--mu:#a9a2d0;--ln:#2f2860;--gold:#ffc94d;--pk:#ff5d8f;--tl:#2ee6c5;--vi:#9b7bff;--ok:#3ddc97;--bad:#ff6b6b}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100vh;font:600 16px/1.5 Nunito,system-ui,sans-serif;color:var(--tx);background:radial-gradient(900px 500px at 10% -10%,var(--g1),transparent),radial-gradient(800px 500px at 100% 0,var(--g2),transparent),var(--bg)}
+#app{max-width:720px;margin:0 auto;padding:14px 14px 130px}
+header{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.logo{font-weight:900;font-size:1.5rem;margin-right:auto;background:linear-gradient(90deg,var(--gold),var(--pk));-webkit-background-clip:text;background-clip:text;color:transparent;cursor:pointer}
+#hud{display:flex;align-items:center;gap:8px}
+.chip{background:var(--card);border:1px solid var(--ln);border-radius:99px;padding:3px 11px;font-weight:900;font-size:.9rem;white-space:nowrap}
+.hot{border-color:var(--gold);color:var(--gold);animation:pl .7s infinite;--c:var(--gold)}
+.xp,.bar{height:10px;background:var(--ln);border-radius:9px;overflow:hidden}.xp{width:76px}.bar{margin:8px 0 14px}
+.xp i,.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--pk));border-radius:9px;transition:width .5s}
+h1{margin:.2em 0}.mu,small{color:var(--mu)}small{display:block}
+.hero{text-align:center;padding:10px 0}.hero h1{font-size:2.5rem}
+.cats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}.cats .cat:last-child{grid-column:1/-1}
+.cat{display:flex;flex-direction:column;align-items:center;gap:4px;padding:18px 10px;font:900 1.15rem Nunito,sans-serif;background:var(--card);color:var(--tx);border:2px solid var(--ln);border-radius:20px;cursor:pointer;transition:transform .12s,border-color .12s}
+.cat span{font-size:2rem}.cat:hover{transform:translateY(-3px) rotate(-1deg);border-color:var(--vi)}.cat:active{transform:scale(.96)}
+.qt{text-align:center;font:italic 1.05rem "Noto Serif",serif;color:var(--mu);margin-top:26px}
+.card{background:var(--card);border:2px solid var(--ln);border-radius:22px;padding:20px;margin:10px 0}
+.big{text-align:center;box-shadow:0 0 calc(var(--h,0)*6px) calc(var(--h,0)*1px) var(--gold);transition:box-shadow .4s}
+.lem{font:700 clamp(2.2rem,9vw,3.2rem)/1.2 "Noto Serif",serif;margin:4px 0}
+.slots{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:18px 0 8px;text-align:left}
+.sl small{font-size:.75rem;font-weight:900;text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px}
+.sl input{width:100%;padding:11px;font:700 1.1rem "Noto Serif",serif;color:var(--tx);background:transparent;border:2px solid var(--vi);border-radius:12px}
+.sl input:focus{outline:0;box-shadow:0 0 0 4px #9b7bff55}
+.sl input.good{border-color:var(--ok);background:#3ddc9722;animation:pop .3s}.sl input.bad{border-color:var(--bad);background:#ff6b6b22}
+.cor{color:var(--ok);font-weight:900;font-family:"Noto Serif",serif;font-size:.95rem}
+.btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px}.top{display:flex;align-items:center;gap:10px;justify-content:space-between;flex-wrap:wrap}
+button{font:inherit;font-weight:900;cursor:pointer;color:var(--tx)}
+.btn{background:linear-gradient(135deg,var(--vi),var(--pk));color:#fff;border:0;padding:13px 24px;border-radius:16px;box-shadow:0 5px 0 #0004;transition:transform .08s}.btn:active{transform:translateY(4px);box-shadow:0 1px 0 #0004}
+.ghost,.ic{background:transparent;border:1px solid var(--ln);border-radius:14px;padding:10px 14px}.ic{padding:6px 10px;border-radius:99px}
+.res{text-align:center}.rk{font-size:4rem;animation:pop .6s}.res h1{font-size:2.4rem;background:linear-gradient(90deg,var(--gold),var(--pk));-webkit-background-clip:text;background-clip:text;color:transparent}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:16px 0}.stats div{border:1px solid var(--ln);border-radius:14px;padding:10px}.stats b{display:block;font-size:1.5rem;color:var(--gold)}
+.rev{text-align:left;margin-top:8px}.rev div{padding:6px 0;border-top:1px dashed var(--ln);font-family:"Noto Serif",serif}
+.fl{position:fixed;left:50%;top:34%;z-index:9;text-align:center;pointer-events:none;font-weight:900;font-size:2rem;color:var(--c);text-shadow:0 2px 12px #0006;animation:rise .95s forwards}.fl small{color:var(--tx);font-size:1rem}
+@keyframes rise{0%{opacity:0;transform:translate(-50%,10px) scale(.6)}20%{opacity:1;transform:translate(-50%,0) scale(1.15)}100%{opacity:0;transform:translate(-50%,-80px)}}
+@keyframes pop{0%{opacity:0;transform:scale(.94)}100%{opacity:1;transform:none}}
+@keyframes pl{0%{box-shadow:0 0 0 0 var(--c)}100%{box-shadow:0 0 0 20px #0000}}
+.p-ok{--c:var(--ok);animation:pl .6s}.p-no{--c:var(--bad);animation:pl .6s}
+#ts{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);left:50%;transform:translateX(-50%);z-index:20;display:grid;gap:8px;width:min(92vw,420px)}
+.t{background:var(--card);border:2px solid var(--gold);border-radius:14px;padding:10px 14px;box-shadow:0 8px 24px #0005;animation:pop .3s}
+#cv{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:8}
+.bot{width:100%;height:auto;display:block;animation:bob 2.4s ease-in-out infinite}@keyframes bob{50%{transform:translateY(-5px)}}
+.bot .eyes,.bot .mouth{transform-box:fill-box;transform-origin:center}.bot .eyes{animation:blk 4s infinite}@keyframes blk{0%,94%,100%{transform:scaleY(1)}97%{transform:scaleY(.1)}}
+.bot .ant{animation:ap 1s infinite alternate}@keyframes ap{to{fill:#ffc94d}}.bot.talk .mouth{animation:mt .16s infinite alternate}@keyframes mt{to{transform:scaleY(3.5)}}
+#ch{position:fixed;left:8px;bottom:calc(env(safe-area-inset-bottom,0px) + 8px);z-index:7;display:flex;align-items:flex-end;gap:6px;pointer-events:none}#ch .bot{width:70px;pointer-events:auto;cursor:pointer}
+.bub{max-width:min(260px,62vw);background:var(--card);color:var(--tx);border:2px solid var(--vi);border-radius:16px 16px 16px 4px;padding:8px 12px;font-weight:800;font-size:.9rem;box-shadow:0 6px 18px #0004}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div id="app"><header><div class="logo" onclick="home()">Lemmi Rush</div><div id="hud"></div></header><main id="v"></main></div>
+<div id="ts"></div><canvas id="cv"></canvas><div id="ch"></div>
+<script>
+const $=s=>document.querySelector(s),V=$('#v');
+let store={xp:0,streak:0,last:'',snd:true},S=null,TT,HT;
+try{Object.assign(store,JSON.parse(localStorage.getItem('lemmi')||'{}'))}catch(e){}
+const save=()=>{try{localStorage.setItem('lemmi',JSON.stringify(store))}catch(e){}};
+const lvl=x=>Math.floor(Math.sqrt(x/40))+1,mul=c=>Math.min(1+.5*Math.floor(c/3),4),pick=a=>a[Math.floor(Math.random()*a.length)];
+const shuf=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+/* ---- dati: lemma|parti|significato ---- */
+const RAW={
+v:`volo|vis,volui,velle|volere
+malo|mavis,malui,malle|preferire
+nolo|non vis,nolui,nolle|non volere
+fugio|fugis,fugi,fugere|fuggire
+carpo|carpis,carpsi,carptum,carpere|cogliere
+sum|es,fui,esse|essere
+fero|fers,tuli,latum,ferre|portare
+eo|is,ii/ivi,itum,ire|andare
+possum|potes,potui,posse|potere
+fio|fis,factus sum,fieri|diventare
+do|das,dedi,datum,dare|dare
+edo|edis,edi,esum,edere|mangiare
+facio|facis,feci,factum,facere|fare
+cupio|cupis,cupivi/cupii,cupitum,cupere|desiderare
+venio|venis,veni,ventum,venire|venire
+capio|capis,cepi,captum,capere|prendere
+disco|discis,didici,discere|imparare
+rapio|rapis,rapui,raptum,rapere|rapire
+video|vides,vidi,visum,videre|vedere
+audio|audis,audivi/audii,auditum,audire|ascoltare
+sapio|sapis,sapivi/sapui/sapii,sapere|sapere
+amo|amas,amavi,amatum,amare|amare
+moneo|mones,monui,monitum,monere|ammonire
+rego|regis,rexi,rectum,regere|reggere
+duco|ducis,duxi,ductum,ducere|condurre
+scribo|scribis,scripsi,scriptum,scribere|scrivere
+mitto|mittis,misi,missum,mittere|mandare
+dico|dicis,dixi,dictum,dicere|dire
+pono|ponis,posui,positum,ponere|porre
+cado|cadis,cecidi,casum,cadere|cadere
+peto|petis,petivi/petii,petitum,petere|chiedere
+vinco|vincis,vici,victum,vincere|vincere
+maneo|manes,mansi,mansum,manere|restare
+teneo|tenes,tenui,tentum,tenere|tenere
+sto|stas,steti,statum,stare|stare
+iuvo|iuvas,iuvi,iutum,iuvare|aiutare
+lego|legis,legi,lectum,legere|leggere
+cognosco|cognoscis,cognovi,cognitum,cognoscere|conoscere
+curro|curris,cucurri,cursum,currere|correre
+timeo|times,timui,timere|temere`,
+n:`rosa|rosae,f|rosa
+agricola|agricolae,m|contadino
+poeta|poetae,m|poeta
+terra|terrae,f|terra
+aqua|aquae,f|acqua
+patria|patriae,f|patria
+dominus|domini,m|padrone
+amicus|amici,m|amico
+bellum|belli,n|guerra
+ager|agri,m|campo
+puer|pueri,m|ragazzo
+verbum|verbi,n|parola
+templum|templi,n|tempio
+rex|regis,m|re
+miles|militis,m|soldato
+pater|patris,m|padre
+mater|matris,f|madre
+urbs|urbis,f|città
+tempus|temporis,n|tempo
+corpus|corporis,n|corpo
+nomen|nominis,n|nome
+homo|hominis,m|uomo
+virtus|virtutis,f|virtù
+civis|civis,m/f|cittadino
+mare|maris,n|mare
+lex|legis,f|legge
+pax|pacis,f|pace
+mens|mentis,f|mente
+iter|itineris,n|cammino
+manus|manus,f|mano
+exercitus|exercitus,m|esercito
+cornu|cornus,n|corno
+res|rei,f|cosa
+dies|diei,m|giorno
+fides|fidei,f|fede
+spes|spei,f|speranza`,
+a:`bonus|bona,bonum|buono
+malus|mala,malum|cattivo
+magnus|magna,magnum|grande
+parvus|parva,parvum|piccolo
+novus|nova,novum|nuovo
+altus|alta,altum|alto
+pulcher|pulchra,pulchrum|bello
+miser|misera,miserum|infelice
+liber|libera,liberum|libero
+acer|acris,acre|acuto
+fortis|forte|forte
+omnis|omne|ogni
+brevis|breve|breve
+facilis|facile|facile
+felix|felicis|felice
+ingens|ingentis|enorme
+potens|potentis|potente
+sapiens|sapientis|saggio`,
+p:`is|ea,id|egli, quello
+hic|haec,hoc|questo
+ille|illa,illud|quello
+qui|quae,quod|il quale
+idem|eadem,idem|lo stesso
+ipse|ipsa,ipsum|stesso, in persona`};
+const LB={v:n=>n>3?['2ª sing.','Perfetto','Supino','Infinito']:['2ª sing.','Perfetto','Infinito'],n:()=>['Genitivo','Genere'],a:(n,p)=>n>1?['Femminile','Neutro']:[/e$/.test(p[0])?'Neutro':'Genitivo'],p:()=>['Femminile','Neutro']};
+const TN={v:'📜 Verbo',n:'🏛️ Nome',a:'✨ Aggettivo',p:'👉 Pronome'};
+const ITEMS=Object.entries(RAW).flatMap(([c,s])=>s.split('\n').map(r=>{const[l,p,m]=r.split('|'),ps=p.split(',');return{c,l,p:ps,m,lb:LB[c](ps.length,ps)}}));
+const QT=[['Vivamus dum licet esse bene','Petronio'],['Audentes fortuna iuvat','Virgilio'],['Carpe diem','Orazio'],['Non scholae sed vitae discimus','Seneca'],['Fortes fortuna adiuvat','Terenzio']];
+const nz=s=>s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f\s.]/g,'');
+const ok=(a,e,g)=>{a=nz(a);return a&&e.split('/').some(x=>g?a[0]==x[0]:a==nz(x))};
+/* ---- audio, effetti ---- */
+let AC;function tone(f,d=.12,ty='triangle',at=0,v=.14){if(!store.snd)return;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain(),t=AC.currentTime+at;o.type=ty;o.frequency.value=f;g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g);g.connect(AC.destination);o.start(t);o.stop(t+d)}catch(e){}}
+const seq=(a,d=.09,ty)=>a.forEach((f,i)=>tone(f,d*1.7,ty,i*d)),vib=p=>{try{navigator.vibrate&&navigator.vibrate(p)}catch(e){}};
+const cv=$('#cv'),cx=cv.getContext('2d'),RM=matchMedia('(prefers-reduced-motion:reduce)').matches;let PS=[],raf=0;
+function sz(){cv.width=innerWidth;cv.height=innerHeight}sz();onresize=sz;
+function boom(n=60,x=innerWidth/2,y=innerHeight*.4,pw=1){if(RM)return;const C=['#ffc94d','#ff5d8f','#2ee6c5','#9b7bff','#3ddc97'];for(let i=0;i<n;i++){const a=Math.random()*6.28,v=(3+Math.random()*9)*pw;PS.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-5,r:3+Math.random()*5,c:C[i%5],l:70+Math.random()*40,t:Math.random()*6})}if(!raf)raf=requestAnimationFrame(tick)}
+function tick(){cx.clearRect(0,0,cv.width,cv.height);PS=PS.filter(p=>p.l>0);PS.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.35;p.vx*=.99;p.l--;p.t+=.2;cx.globalAlpha=Math.min(1,p.l/30);cx.fillStyle=p.c;cx.save();cx.translate(p.x,p.y);cx.rotate(p.t);cx.fillRect(-p.r,-p.r/2,p.r*2,p.r);cx.restore()});raf=PS.length?requestAnimationFrame(tick):0;if(!raf)cx.clearRect(0,0,cv.width,cv.height)}
+const shake=()=>{if(!RM)$('#app').animate([{transform:'translateX(0)'},{transform:'translateX(-9px)'},{transform:'translateX(9px)'},{transform:'translateX(-5px)'},{transform:'none'}],{duration:320})};
+function toast(m){const e=document.createElement('div');e.className='t';e.innerHTML=m;$('#ts').append(e);setTimeout(()=>e.remove(),2800)}
+/* ---- Chiana ---- */
+const bot=()=>`<svg class=bot viewBox='0 0 100 110'><line x1=50 y1=10 x2=50 y2=22 stroke=#9b7bff stroke-width=3 /><circle class=ant cx=50 cy=8 r=6 fill=#ff5d8f /><rect x=18 y=22 width=64 height=48 rx=16 fill=#c9bfff stroke=#6d3df0 stroke-width=3 /><rect x=26 y=31 width=48 height=30 rx=10 fill=#1a1538 /><g class=eyes><circle cx=40 cy=44 r=6 fill=#2ee6c5 /><circle cx=60 cy=44 r=6 fill=#2ee6c5 /></g><rect class=mouth x=42 y=53 width=16 height=3 rx=1.5 fill=#ffc94d /><rect x=30 y=74 width=40 height=28 rx=10 fill=#9b7bff stroke=#6d3df0 stroke-width=3 /><circle cx=50 cy=88 r=5 fill=#ffc94d /><rect x=8 y=78 width=16 height=9 rx=4.5 fill=#c9bfff /><rect x=76 y=78 width=16 height=9 rx=4.5 fill=#c9bfff /></svg>`;
+function say(t,ms=3200){const b=$('#cb'),r=$('#ch .bot');clearTimeout(HT);clearInterval(TT);const a=[...t];let i=0;b.hidden=false;b.textContent='';r.classList.add('talk');TT=setInterval(()=>{b.textContent=a.slice(0,++i).join('');if(i%2==0)tone(260+Math.random()*420,.04,'square',0,.04);if(i>=a.length){clearInterval(TT);r.classList.remove('talk')}},30);HT=setTimeout(()=>b.hidden=true,ms+a.length*30)}
+const RP=['Beep! Perfetto!','Che macchina sei! (Ma io di più.)','Ave, magister!','Il mio cuore di silicio fa boom!'],RH=['Quasi! Una parolina e saresti perfetto!','A metà strada: bravo, continua!'],RW=['Uh-oh! Succede ai migliori. Riproviamo!','Errore 404: lemma non trovato. Lo ritroveremo!','Sbagliando si impara. Beep di incoraggiamento!'];
+const CHL=['Dum spiro, spero… e ricarico le batterie!','Il latino non è morto: sta facendo l’aggiornamento!','Ho due hobby: i paradigmi e cercare il mio cavo di ricarica.','Clicca pure: mi fai il solletico ai circuiti!'];
+/* ---- HUD ---- */
+function hud(){const x=store.xp,L=lvl(x),lo=40*(L-1)**2,hi=40*L*L;$('#hud').innerHTML=`<span class=chip>🔥 ${store.streak}</span><span class=chip>Lv ${L}</span><div class=xp><i style='width:${(x-lo)/(hi-lo)*100}%'></i></div><span class=chip>${x} XP</span><button id=mute class=ic>${store.snd?'🔊':'🔇'}</button>`;$('#mute').onclick=()=>{store.snd=!store.snd;save();hud();tone(660,.08)}}
+/* ---- schermate ---- */
+function home(){S=null;const q=pick(QT);V.innerHTML=`<section class=hero><h1>Lemmi Rush</h1><p class=mu>Ripassa verbi, nomi e aggettivi a colpi di combo.</p></section><div class=cats>${[['v','📜','Verbi'],['n','🏛️','Nomi'],['a','✨','Aggettivi'],['p','👉','Pronomi'],['all','🎲','Tutto mescolato']].map(c=>`<button class=cat onclick="play('${c[0]}')"><span>${c[1]}</span>${c[2]}</button>`).join('')}</div><p class=qt>«${q[0]}»<small>${q[1]}</small></p>`;hud()}
+function play(c,list){const q=list||shuf(ITEMS.filter(x=>c=='all'||x.c==c)).slice(0,10);S={q:shuf([...q]),i:0,combo:0,perfect:0,xp:0,best:0,wrong:[],done:0,T:0};say(list?'Ripassiamo gli errori: stavolta li domiamo!':'Si parte! Scrivi le forme e premi Invio. Io tifo per te!');card()}
+function card(){const it=S.q[S.i];S.done=0;
+V.innerHTML=`<div class=top><button class=ghost onclick=home()>← Esci</button><span class=mu>${S.i+1} / ${S.q.length}</span>${S.combo>1?`<span class='chip hot'>Combo ${S.combo} · ×${mul(S.combo)}</span>`:''}</div><div class=bar><i style='width:${S.i/S.q.length*100}%'></i></div><div class='card big' id=cd style='--h:${Math.min(S.combo,10)}'><small>${TN[it.c]}</small><div class=lem>${it.l}</div><div class=mu>${it.m}</div><div class=slots>${it.lb.map((l,i)=>`<label class=sl><small>${l}</small><input id=s${i} autocomplete=off autocapitalize=off spellcheck=false placeholder='${it.c=='n'&&i==1?'m / f / n':''}'></label>`).join('')}</div><div class=btns id=act><button class=btn onclick=chk()>Controlla ✔</button><button class=ghost onclick=chk(1)>Non lo so</button></div></div>`;
+const ins=[...document.querySelectorAll('.sl input')];ins.forEach((e,i)=>{e.onkeydown=k=>{if(k.key=='Enter'){k.preventDefault();k.stopPropagation();i<ins.length-1?ins[i+1].focus():chk()}else if(k.key.length==1)tone(700+Math.random()*300,.03,'square',0,.02)}});ins[0].focus()}
+function chk(skip){if(S.done)return;S.done=1;const it=S.q[S.i];let hit=0;
+it.p.forEach((e,i)=>{const el=$('#s'+i),g=it.c=='n'&&i==1,good=!skip&&ok(el.value,e,g);el.disabled=true;el.classList.add(good?'good':'bad');if(good)hit++;else el.parentNode.insertAdjacentHTML('beforeend',`<small class=cor>${e.split('/').join(' / ')}</small>`)});
+const all=hit==it.p.length,L0=lvl(store.xp);if(all){S.combo++;S.perfect++}else{S.combo=0;S.wrong.push(it)}S.best=Math.max(S.best,S.combo);
+const lucky=all&&Math.random()<.2;let g=Math.round((hit*10+(all?10:0))*mul(S.combo));if(lucky)g*=2;store.xp+=g;S.xp+=g;
+const T=new Date(),dy=x=>x.getFullYear()+'-'+(x.getMonth()+1)+'-'+x.getDate();if(store.last!=dy(T)){store.streak=store.last==dy(new Date(Date.now()-864e5))?store.streak+1:1;store.last=dy(T)}
+$('#cd').classList.add(all?'p-ok':'p-no');
+if(g){const f=document.createElement('div');f.className='fl';f.style.setProperty('--c',all?'var(--ok)':'var(--gold)');f.innerHTML=`${lucky?'🍀 FORTUNATO ×2<br>':''}+${g} XP<small>${mul(S.combo)>1?'combo ×'+mul(S.combo):all?'perfetto!':hit+'/'+it.p.length+' giuste'}</small>`;document.body.append(f);setTimeout(()=>f.remove(),1000)}
+if(all){const b=330*Math.pow(1.0595,Math.min(S.combo,12));seq([b,b*1.25,b*1.5,b*2],.07);vib(S.combo>2?[20,30,20,30,40]:[25]);boom(30+S.combo*12+(lucky?90:0),innerWidth/2,innerHeight*.4,1+Math.min(S.combo,8)/10);if(S.combo>=3&&S.combo%3==0){shake();toast(`🔥 <b>Combo ×${mul(S.combo)}!</b>`)}}else{hit?seq([440,554],.09):tone(180,.25,'sawtooth',0,.08);if(!hit){shake();vib([60,40,60])}}
+say(lucky?'🍀 Fortuna doppia! Il mio sensore è impazzito!':all?(S.combo>=3&&S.combo%3==0?'COMBO ×'+mul(S.combo)+'! Ventole al massimo! 🔥':pick(RP)):hit?pick(RH):pick(RW));
+const L1=lvl(store.xp);if(L1>L0)setTimeout(()=>{toast(`⬆️ <b>Livello ${L1}!</b>`);boom(220,innerWidth/2,innerHeight*.5,1.7);seq([523,659,784,1047,1319,1568],.08);say('LIVELLO '+L1+'! Brividi nei servomotori!',4000)},500);
+save();hud();
+if(all)S.T=setTimeout(nxt,850);else $('#act').innerHTML=`<button class=btn onclick=nxt()>Avanti ▶ (Invio)</button>`}
+function nxt(){clearTimeout(S.T);if(!S||S.done!=1)return;S.done=2;S.i++;S.i>=S.q.length?end():card()}
+function end(){const n=S.q.length,acc=Math.round(S.perfect/n*100),R=[[95,'Princeps','👑'],[80,'Philologus','🏛️'],[60,'Magister','🎓'],[40,'Interpres','📜'],[20,'Discipulus','✏️'],[0,'Tiro','🌱']].find(r=>acc>=r[0]),w=S.wrong;
+seq([523,659,784,1047,1319],.12);vib([40,40,90]);boom(200,innerWidth*.3,innerHeight*.4,1.5);setTimeout(()=>boom(200,innerWidth*.7,innerHeight*.4,1.5),300);
+say(w.length?'Missione compiuta! Ripassa gli errori e diventi imbattibile!':'ZERO errori?! Sono… senza parole. Beep.',5000);
+V.innerHTML=`<div class='card res'><div class=rk>${R[2]}</div><small>Il tuo grado</small><h1>${R[1]}</h1><div class=stats><div><b>${S.perfect}/${n}</b>perfetti</div><div><b>${S.xp}</b>XP</div><div><b>×${S.best}</b>combo max</div></div>${w.length?`<b>Da ripassare</b><div class=rev>${w.map(i=>`<div>${i.l}, ${i.p.join(', ')} <span class=mu>— ${i.m}</span></div>`).join('')}</div>`:''}<div class=btns>${w.length?`<button class=btn onclick='play(0,S.wrong)'>Ripassa gli errori</button>`:''}<button class=${w.length?'ghost':'btn'} onclick=home()>Nuova sfida</button></div></div>`}
+document.onkeydown=e=>{if(S&&S.done==1&&e.key=='Enter')nxt()};
+$('#ch').innerHTML=bot()+'<div class=bub id=cb hidden></div>';$('#ch .bot').onclick=()=>say(pick(CHL));
+hud();home();setTimeout(()=>say('Beep! Sono Chiana. Scegli una categoria e facciamo combo con i lemmi!',4000),600);
+</script>
+</body>
+</html>
