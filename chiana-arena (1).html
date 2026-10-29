@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Chiana Arena – interrogati, vinci, sali di livello</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bowlby+One&family=Rubik:wght@400;500;700&display=swap">
+<style>
+:root{--n:#140a3c;--v:#6d3df0;--p:#ff3d8b;--y:#ffd23f;--m:#2ef2c0;--card:#1f1170}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;font:500 17px/1.5 Rubik,system-ui,sans-serif;color:#fff;background:linear-gradient(160deg,#3a14a8,#140a3c 55%,#5a0f72) fixed;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;background:radial-gradient(#ffffff26 2px,transparent 2px) 0 0/38px 38px;animation:drift 8s linear infinite;pointer-events:none}
+@keyframes drift{to{background-position:38px 76px}}
+h1,h2,.big,.btn,.logo{font-family:'Bowlby One',Impact,sans-serif;font-weight:400}
+#hud{position:sticky;top:0;z-index:6;display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 14px;background:#0d0630ee;border-bottom:4px solid var(--m);box-shadow:0 0 24px #2ef2c055}
+.logo{font-size:1.25rem;color:var(--y);margin-right:auto;text-shadow:0 0 14px #ffd23f88}
+.chip{background:#2a1a8c;border:3px solid var(--y);border-radius:99px;padding:2px 12px;font-weight:700;font-size:.9rem;white-space:nowrap;transition:transform .2s}
+.chip.pop{transform:scale(1.3)}#cb.hot{border-color:var(--p);background:var(--p);animation:heat .5s infinite alternate}@keyframes heat{to{transform:scale(1.12)}}
+.xpb{width:96px;height:16px;background:#0d0630;border:3px solid var(--m);border-radius:9px;overflow:hidden}
+.xpb i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--m),var(--y),var(--p));transition:width .6s}
+.ic{border:3px solid #000;background:var(--y);border-radius:50%;width:38px;height:38px;cursor:pointer}
+#load{flex-basis:100%;order:9}.lt{display:flex;justify-content:space-between;font-weight:700;font-size:.9rem;color:var(--y);margin:2px 2px 4px}
+.lb{height:14px;border:3px solid #000;border-radius:9px;background:#2a1a8c;overflow:hidden}
+.lb i{display:block;height:100%;width:0;background:repeating-linear-gradient(-45deg,var(--p) 0 12px,var(--y) 12px 24px);background-size:34px 34px;animation:st .6s linear infinite;transition:width .4s}@keyframes st{to{background-position:34px 0}}
+main{position:relative;max-width:720px;margin:0 auto;padding:18px 14px 80px}
+.card{background:var(--card);border:3px solid var(--m);border-radius:22px;box-shadow:0 0 0 3px #000,0 0 30px #2ef2c044;padding:20px;margin-bottom:20px}
+.hero{text-align:center;margin:6px 0 18px}.hero h1{font-size:clamp(2.4rem,10vw,3.6rem);line-height:1;color:var(--y);text-shadow:4px 4px 0 var(--p),0 0 30px #ffd23f66}
+.hero p{font-size:1.15rem;margin:10px 0 0}.hero .botw{width:150px;margin:0 auto}
+.drop{display:grid;gap:4px;place-items:center;text-align:center;border:4px dashed var(--y);border-radius:18px;padding:26px 14px;cursor:pointer;background:#2a1a8c;transition:transform .15s,background .15s}
+.drop:hover,.drop.ov{transform:scale(1.03);background:#3a24b0}.drop b{font:400 1.3rem 'Bowlby One',sans-serif;color:var(--y)}#fn{color:var(--m);font-weight:700}
+label{display:block;font-weight:700;margin:16px 0 4px}
+textarea{width:100%;min-height:120px;resize:vertical;font:500 1rem Rubik,sans-serif;color:#fff;background:#0d0630;border:3px solid var(--v);border-radius:14px;padding:10px 12px}
+textarea:focus,button:focus-visible{outline:4px solid var(--p);outline-offset:2px}
+.rule{color:#cfc6ff;font-size:.95rem}
+.btn{font-size:1.25rem;color:#000;background:linear-gradient(180deg,var(--y),#ff9f1c);border:4px solid #000;border-radius:16px;box-shadow:0 6px 0 #000,0 0 24px #ffd23f77;padding:12px 24px;cursor:pointer;margin:14px 8px 8px 0;animation:pulse 1.6s ease-in-out infinite;transition:transform .08s}
+.btn.pk{background:linear-gradient(180deg,#ff7ab0,var(--p));color:#fff;box-shadow:0 6px 0 #000,0 0 24px #ff3d8b88}.btn.ghost{animation:none;font-size:1rem;background:#2a1a8c;color:#fff;box-shadow:0 4px 0 #000}
+.btn:hover{transform:translateY(-2px) scale(1.04)}.btn:active{transform:translateY(5px);box-shadow:0 1px 0 #000}.btn[disabled]{opacity:.55;cursor:wait;animation:none}
+@keyframes pulse{50%{transform:scale(1.045)}}
+#mdls{font-weight:700;margin-top:8px}
+.botw{animation:bob 2s ease-in-out infinite;flex:none}.think.botw{animation:bob .35s ease-in-out infinite}.jump.botw{animation:jump .6s}
+@keyframes bob{50%{transform:translateY(-8px)}}@keyframes jump{30%{transform:translateY(-34px) scale(1.1)}60%{transform:translateY(0)}80%{transform:translateY(-10px)}}
+.botw{position:relative}
+.botw.dance{animation:dance .7s ease-in-out infinite alternate}
+@keyframes dance{0%{transform:translateX(-16px) rotate(-9deg)}50%{transform:translateY(-24px) rotate(0)}100%{transform:translateX(16px) rotate(9deg)}}
+.dance .armL,.dance .armR{transform-box:fill-box;animation:wv .3s infinite alternate}
+.dance .armL{transform-origin:right center}.dance .armR{transform-origin:left center;animation-name:wr}
+@keyframes wv{to{transform:rotate(60deg)}}@keyframes wr{to{transform:rotate(-60deg)}}
+.dance .eyes{animation:none;transform:scaleY(.4)}.dance .mouth{transform:scale(1.8,2.6)}.dance .ant{animation-duration:.25s}
+.botw.dance::before,.botw.dance::after{position:absolute;top:6px;font-size:1.7rem;color:var(--y);text-shadow:0 0 10px var(--p);animation:note 1s ease-out infinite}
+.botw.dance::before{content:"♫";left:-18px}.botw.dance::after{content:"♪";right:-14px;animation-delay:.5s}
+@keyframes note{from{transform:translateY(14px);opacity:1}to{transform:translateY(-46px);opacity:0}}
+.bot{width:100%;display:block}.bot .eyes,.bot .mouth{transform-box:fill-box;transform-origin:center}.bot .eyes{animation:blk 4s infinite}
+@keyframes blk{0%,94%,100%{transform:scaleY(1)}97%{transform:scaleY(.1)}}
+.bot .ant{animation:ap 1s infinite alternate}@keyframes ap{to{fill:#ffd23f}}
+.happy .eyes{animation:none;transform:scaleY(.4)}.happy .mouth{transform:scale(1.8,2.6)}
+.mad .eyes circle{fill:#ff3d8b}.mad .mouth{transform:scale(.6,1)}
+.think .eyes{animation:look .9s infinite alternate}@keyframes look{from{transform:translateX(-5px)}to{transform:translateX(5px)}}
+.talk .mouth{animation:mt .16s infinite alternate}@keyframes mt{to{transform:scaleY(3.5)}}
+.hero .armR{transform-box:fill-box;transform-origin:left center;animation:wave .5s infinite alternate}@keyframes wave{to{transform:rotate(-45deg)}}
+.round{display:flex;align-items:center;gap:10px;margin-bottom:14px;font-weight:700}
+.hp{flex:1;height:26px;background:#0d0630;border:4px solid #000;border-radius:14px;overflow:hidden}
+.hp i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#ff1f5a,var(--p));transition:width .8s cubic-bezier(.2,1.4,.4,1)}
+.hit{animation:sh .45s}@keyframes sh{20%{transform:translateX(-12px)}40%{transform:translateX(12px)}60%{transform:translateX(-8px)}80%{transform:translateX(8px)}}
+.pr{display:flex;gap:12px;align-items:flex-end}.pr .botw{width:104px}
+.bub{flex:1;background:#fff;color:#1d1640;border:4px solid #000;border-radius:20px 20px 20px 4px;box-shadow:6px 6px 0 var(--p);padding:14px 16px;font-size:1.12rem;font-weight:700;white-space:pre-wrap;min-height:64px}
+#res{animation:pop .4s cubic-bezier(.2,1.6,.4,1)}@keyframes pop{from{transform:scale(.6);opacity:0}}
+.gr{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.big{font-size:5rem;line-height:1.1;min-width:140px;text-align:center;border:4px solid #000;border-radius:18px;padding:0 12px;color:#000;box-shadow:0 6px 0 #000;animation:slam .5s cubic-bezier(.2,1.5,.4,1)}
+@keyframes slam{from{transform:scale(3) rotate(-12deg);opacity:0}}
+.big.hi{background:var(--m)}.big.mid{background:var(--y)}.big.lo{background:var(--p);color:#fff}
+.vd{font:400 1.6rem 'Bowlby One',sans-serif}.gain{font-weight:700;color:var(--m);font-size:1.15rem}
+#fb{white-space:pre-wrap;margin-top:12px}
+.stars{font-size:3rem;color:var(--y);letter-spacing:6px;text-shadow:0 0 18px #ffd23f}
+#fx{position:fixed;inset:0;opacity:0;pointer-events:none;z-index:7}@keyframes fh{from{opacity:.55}to{opacity:0}}
+#cf{position:fixed;inset:0;pointer-events:none;z-index:9}
+.fl{position:fixed;z-index:9;font:400 2.2rem 'Bowlby One',sans-serif;text-shadow:3px 3px 0 #000;animation:fr 1.2s ease-out forwards;pointer-events:none}@keyframes fr{to{transform:translateY(-130px);opacity:0}}
+#lvl{position:fixed;inset:0;display:none;place-items:center;z-index:8;pointer-events:none}
+#lvl b{font:400 clamp(2.2rem,10vw,5rem) 'Bowlby One',sans-serif;color:var(--y);text-align:center;text-shadow:5px 5px 0 #000,0 0 30px var(--p);animation:pop .5s}
+#err{display:none;background:#d4115a;border:4px solid #000;border-radius:14px;padding:12px 16px;margin-bottom:16px;font-weight:700;white-space:pre-wrap}
+#toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:10;background:#d4115a;border:4px solid #000;border-radius:14px;padding:10px 16px;max-width:90vw;font-weight:700;display:none}
+#dbg{margin-top:10px;background:#0d0630;border:3px solid var(--v);border-radius:12px;padding:8px 12px;font-size:.85rem}#dbg pre{white-space:pre-wrap;margin:6px 0 0;max-height:220px;overflow:auto;color:var(--m)}
+ul{padding-left:20px}[hidden]{display:none!important}
+@media (prefers-reduced-motion:reduce){*,*::before{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div id="fx"></div>
+<header id="hud">
+  <span class="logo">Chiana Arena</span>
+  <span class="chip" id="lv">Lv 1</span>
+  <div class="xpb" title="Esperienza"><i id="xpi"></i></div>
+  <span class="chip" id="xp">0 XP</span>
+  <span class="chip" id="cb">🔥 x0</span>
+  <button class="ic" id="mu" title="Audio on/off" aria-label="Audio on/off">🔊</button>
+  <div id="load" hidden><div class="lt"><span id="lmsg"></span><span id="ltm"></span></div><div class="lb"><i id="lbi"></i></div></div>
+</header>
+<main>
+<div id="err" role="alert"></div>
+
+<section id="setup">
+  <div class="hero">
+    <div class="botw dance" id="b0"></div>
+    <h1>Chiana Arena</h1>
+    <p>Carica i tuoi appunti. Chiana ti interroga. Tu sali di livello.</p>
+  </div>
+  <div class="card">
+    <label class="drop" id="drop" for="file"><b>Trascina qui i tuoi appunti</b><span>txt, md o pdf. Oppure clicca per sceglierli</span><span id="fn"></span></label>
+    <input id="file" type="file" accept=".txt,.md,.pdf" hidden>
+    <label for="notes">Oppure incolla il testo</label>
+    <textarea id="notes" placeholder="Incolla qui i tuoi appunti"></textarea>
+    <p class="rule">Chiana fa una domanda per ogni paragrafo (circa 6-7 frasi). Per superarla serve almeno 9.</p>
+    <button class="btn" id="go">Entra nell'arena</button><button class="btn ghost" id="test">Prova la connessione</button>
+    <div id="mdls"></div>
+  </div>
+</section>
+
+<section id="quiz" hidden>
+  <div class="round"><span id="rn">Round 1</span><div class="hp" title="Energia di Chiana"><i id="hpi"></i></div></div>
+  <div class="pr" id="pr"><div class="botw" id="bq"></div><div class="bub" id="q" aria-live="polite"></div></div>
+  <div class="card" id="ans" style="margin-top:22px">
+    <label for="a">La tua risposta</label>
+    <textarea id="a" placeholder="Scrivi qui. Ctrl+Invio per rispondere"></textarea>
+    <button class="btn pk" id="send">Rispondi</button>
+  </div>
+  <div class="card" id="res" hidden>
+    <div class="gr"><div class="big" id="bg">0</div><div><div class="vd" id="vd"></div><div class="gain" id="gn"></div></div></div>
+    <div id="fb"></div>
+    <button class="btn" id="next">Continua</button>
+  </div>
+</section>
+
+<section id="final" class="card" hidden style="text-align:center">
+  <div class="botw" id="bf" style="width:130px;margin:0 auto"></div>
+  <h2 style="font-size:2rem;color:var(--y);margin:8px 0">Chiana è stato sconfitto!</h2>
+  <div class="stars" id="st"></div>
+  <div class="gr" style="justify-content:center;margin:14px 0"><div class="big" id="fg">0</div><div class="vd">Voto complessivo</div></div>
+  <p id="fr"></p>
+  <div style="text-align:left"><h2 style="font-size:1.3rem;color:var(--p)">Da ripassare</h2><ul id="fw"></ul></div>
+  <button class="btn pk" id="again">Nuova partita</button>
+</section>
+
+<details id="dbg"><summary>Diagnostica</summary><pre id="log"></pre></details>
+</main>
+<canvas id="cf"></canvas>
+<div id="toast" role="alert"></div>
+<div id="lvl"><b id="lvt"></b></div>
+
+<script>
+/* ===== DA COMPILARE ===== */
+const API_KEY='AQ.Ab8RN6Iy0mnt2_28dSqPhPzpt-80T9LfyuejG-YVUHmVwcDR2w';
+const MODEL='gemini-3.5-flash-lite';
+/* ======================== */
+const $=s=>document.querySelector(s),sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const RM=matchMedia('(prefers-reduced-motion:reduce)').matches;
+const SYS=`Ti chiami Chiana, sei un robot maschio e professore severo ma costruttivo: parla di te al maschile. Dai del tu, usa frasi brevi e incisive.
+Ti fornisco del materiale di studio. Il tuo compito è:
+1. Farmi domande sul contenuto, una alla volta, basate solo sul materiale
+2. Aspettare la mia risposta prima di procedere
+3. Valutare ogni risposta con un voto da 0 a 10 (usa anche i decimali, es. 7.5)
+4. Spiegarmi cosa ho detto di giusto e cosa manca o è errato
+5. Se il voto è inferiore a 9, riformulare la stessa domanda e aspettare una risposta migliore
+6. Passare alla domanda successiva solo quando la risposta raggiunge almeno 9/10
+7. Alla fine, darmi un voto complessivo e un riepilogo dei miei punti deboli
+{N} Rispondi SEMPRE e SOLO con un oggetto JSON con questi campi: "totale" (numero intero: quante domande farai in tutto), "feedback" (stringa: cosa è giusto e cosa manca o è errato; stringa vuota alla prima domanda), "voto" (numero da 0 a 10, null alla prima domanda), "passa" (booleano: true se voto>=9), "domanda" (stringa: la prossima domanda se passa, la stessa domanda riformulata se non passa), "finale" (booleano: true solo quando l'ultima domanda ha raggiunto almeno 9), "voto_finale" (numero, solo se finale), "punti_deboli" (array di stringhe, solo se finale), "riepilogo" (stringa, solo se finale).`;
+const S={key:API_KEY,model:MODEL,xp:0,combo:0,passed:0,lv:1,hist:[],pdf:null,muted:false,busy:false,med:{},n:8};
+let AC,NEXT=null,TY;
+const BOT='<svg class="bot" viewBox="0 0 100 112" aria-hidden="true"><line x1="50" y1="10" x2="50" y2="22" stroke="#9b7bff" stroke-width="3"/><circle class="ant" cx="50" cy="8" r="6" fill="#ff3d8b"/><rect x="18" y="22" width="64" height="48" rx="16" fill="#c9bfff" stroke="#6d3df0" stroke-width="3"/><rect x="26" y="31" width="48" height="30" rx="10" fill="#1a1538"/><g class="eyes"><circle cx="40" cy="44" r="6" fill="#2ef2c0"/><circle cx="60" cy="44" r="6" fill="#2ef2c0"/></g><rect class="mouth" x="42" y="53" width="16" height="3" rx="1.5" fill="#ffd23f"/><rect x="30" y="74" width="40" height="28" rx="10" fill="#9b7bff" stroke="#6d3df0" stroke-width="3"/><circle cx="50" cy="88" r="5" fill="#ffd23f"/><rect class="armL" x="8" y="78" width="16" height="9" rx="4.5" fill="#c9bfff"/><rect class="armR" x="76" y="78" width="16" height="9" rx="4.5" fill="#c9bfff"/></svg>';
+['#b0','#bq','#bf'].forEach(s=>$(s).innerHTML=BOT);
+function mood(m){['#bq','#bf'].forEach(s=>{const b=$(s);b.classList.remove('happy','mad','think','talk','jump','dance');if(m){void b.offsetWidth;b.classList.add(m)}})}
+function keyOk(){if(/^INSERISCI/.test(API_KEY)||/^INSERISCI/.test(MODEL)){err('Apri il file con un editor di testo e scrivi la chiave API e il modello nelle costanti API_KEY e MODEL, in cima allo script.');return false}return true}
+
+function tone(f,d=.12,t='square'){if(S.muted)return;try{AC=AC||new AudioContext();const o=AC.createOscillator(),g=AC.createGain();o.type=t;o.frequency.value=f;g.gain.value=.07;o.connect(g);g.connect(AC.destination);o.start();g.gain.exponentialRampToValueAtTime(.0001,AC.currentTime+d);o.stop(AC.currentTime+d)}catch(e){}}
+const jingle=a=>a.forEach((f,i)=>setTimeout(()=>tone(f,.16),i*90));
+$('#mu').onclick=()=>{S.muted=!S.muted;$('#mu').textContent=S.muted?'🔇':'🔊'};
+
+const cv=$('#cf'),cx=cv.getContext('2d');let P=[],raf=0;
+function size(){cv.width=innerWidth;cv.height=innerHeight}size();onresize=size;
+function confetti(n=140){if(RM)return;const C=['#ffd23f','#ff3d8b','#2ef2c0','#fff','#9b7bff'];for(let i=0;i<n;i++){const a=Math.random()*Math.PI*2,v=6+Math.random()*12;P.push({x:innerWidth/2,y:innerHeight*.4,vx:Math.cos(a)*v,vy:Math.sin(a)*v-8,w:6+Math.random()*8,c:C[i%5],l:90+Math.random()*50,r:Math.random()*6})}if(!raf)raf=requestAnimationFrame(tick)}
+function tick(){cx.clearRect(0,0,cv.width,cv.height);P=P.filter(p=>p.l>0);P.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.4;p.vx*=.99;p.l--;p.r+=.2;cx.globalAlpha=Math.min(1,p.l/30);cx.fillStyle=p.c;cx.save();cx.translate(p.x,p.y);cx.rotate(p.r);cx.fillRect(-p.w/2,-p.w/4,p.w,p.w/2);cx.restore()});raf=P.length?requestAnimationFrame(tick):0;if(!raf)cx.clearRect(0,0,cv.width,cv.height)}
+function flash(c){if(RM)return;const f=$('#fx');f.style.background=c;f.style.animation='none';void f.offsetWidth;f.style.animation='fh .5s'}
+function fl(t,c){if(RM)return;const e=document.createElement('span');e.className='fl';e.textContent=t;e.style.color=c;e.style.left=(25+Math.random()*45)+'vw';e.style.top='42vh';document.body.append(e);setTimeout(()=>e.remove(),1200)}
+function hit(el){if(RM)return;el.classList.remove('hit');void el.offsetWidth;el.classList.add('hit')}
+let BQ=[],BB=0;function banner(t){BQ.push(t);if(!BB)nb()}function nb(){const t=BQ.shift();if(!t){BB=0;return}BB=1;$('#lvt').textContent=t;$('#lvl').style.display='grid';setTimeout(()=>{$('#lvl').style.display='none';setTimeout(nb,150)},1400)}
+function medal(k,t){if(S.med[k])return;S.med[k]=1;banner('🏅 '+t);jingle([659,880,1319])}
+
+const t0log=Date.now();function log(m){const p=$('#log');p.textContent+=((Date.now()-t0log)/1000).toFixed(1)+' s  '+m+'\n';p.scrollTop=p.scrollHeight}
+function err(m){const e=$('#err');e.textContent=m;e.style.display=m?'block':'none';if(m){log('ERRORE: '+m);scrollTo(0,0)}}
+onerror=(m,u,l)=>{err('Errore nella pagina: '+m+' (riga '+l+')')};
+let LT,LS=0;const MSG=['Chiana sta leggendo…','Chiana sta pensando…','Chiana impugna la penna rossa…','Chiana sta scrivendo il voto…'];
+function loader(on){const L=$('#load');clearInterval(LT);if(!on){$('#lbi').style.width='100%';setTimeout(()=>{L.hidden=true},400);return}
+L.hidden=false;LS=Date.now();$('#lbi').style.width='0';$('#lmsg').textContent=MSG[0];$('#ltm').textContent='0 s';
+LT=setInterval(()=>{const s=(Date.now()-LS)/1000;$('#lbi').style.width=(90*(1-Math.exp(-s/9)))+'%';$('#ltm').textContent=Math.floor(s)+' s';$('#lmsg').textContent=MSG[Math.min(3,Math.floor(s/4))]},200)}
+function toast(m){const t=$('#toast');t.textContent=m;t.style.display='block';clearTimeout(t._t);t._t=setTimeout(()=>t.style.display='none',5000)}
+function view(v){['setup','quiz','final'].forEach(x=>$('#'+x).hidden=x!==v);scrollTo(0,0)}
+function hud(){const need=150,lv=Math.floor(S.xp/need)+1;if(lv>S.lv){S.lv=lv;banner('Livello '+lv+'!');jingle([392,523,659,784,1047]);confetti(90)}
+$('#lv').textContent='Lv '+S.lv;$('#xp').textContent=S.xp+' XP';const c=$('#cb');c.textContent='🔥 x'+S.combo;c.classList.toggle('hot',S.combo>=2);c.classList.add('pop');setTimeout(()=>c.classList.remove('pop'),250);$('#xpi').style.width=(S.xp%need)/need*100+'%'}
+
+function load(f){if(!f)return;S.pdf=null;$('#fn').textContent=f.name;const r=new FileReader();
+if(/\.pdf$/i.test(f.name)){r.onload=()=>{S.pdf=r.result.split(',')[1]};r.readAsDataURL(f)}else{r.onload=()=>{$('#notes').value=r.result};r.readAsText(f)}}
+$('#file').onchange=e=>load(e.target.files[0]);
+const dz=$('#drop');['dragenter','dragover'].forEach(v=>dz.addEventListener(v,e=>{e.preventDefault();dz.classList.add('ov')}));
+['dragleave','drop'].forEach(v=>dz.addEventListener(v,e=>{e.preventDefault();dz.classList.remove('ov')}));dz.addEventListener('drop',e=>load(e.dataTransfer.files[0]));
+
+function parse(t){try{return JSON.parse(t.replace(/^\s*```(?:json)?/i,'').replace(/```\s*$/,'').trim())}catch(e){return{domanda:t,voto:null,feedback:''}}}
+const netErr=()=>{throw new Error('Il browser non riesce a raggiungere Gemini (Failed to fetch). Cause tipiche: estensione che blocca le richieste (adblock, privacy), antivirus, VPN, rete della scuola, oppure sei offline.')};
+async function call(body,ms=90000){const ac=new AbortController(),to=setTimeout(()=>ac.abort(),ms),t=performance.now();log('Invio la richiesta a '+S.model+'…');
+try{const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(S.model)+':generateContent?key='+encodeURIComponent(S.key),{method:'POST',signal:ac.signal,headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+const j=await r.json().catch(()=>({}));log('Risposta HTTP '+r.status+' in '+((performance.now()-t)/1000).toFixed(1)+' s');return{r,j}}
+catch(e){throw new Error(e.name=='AbortError'?'Gemini non ha risposto entro '+ms/1000+' secondi. Controlla connessione, modello e chiave.':'Impossibile contattare Gemini ('+e.message+'). Controlla internet e che la pagina non sia bloccata da un\'estensione o dalla rete della scuola.')}
+finally{clearTimeout(to)}}
+function explain(s,j){const m=(j.error&&j.error.message)||'';return(s==400&&/API key/i.test(m)?'Chiave API non valida: controlla di averla copiata per intero in API_KEY.\n':s==403?'La chiave non può usare questo modello, oppure l\'API non è abilitata.\n':s==404?'Il modello "'+S.model+'" non esiste per la tua chiave: correggi la costante MODEL in cima allo script.\n':s==429?'Quota di richieste esaurita: aspetta un minuto o controlla il piano.\n':'')+'Codice '+s+': '+m}
+async function ask(){let d=2;
+for(let i=0;i<4;i++){
+const sys=SYS.replace('{N}',S.pdf&&!S.nFix?'Fai una domanda per ogni paragrafo di circa 6-7 frasi del materiale (massimo 30 in totale).':'Fai esattamente '+S.n+' domande in tutto, una per ogni paragrafo di circa 6-7 frasi.');
+const{r,j}=await call({systemInstruction:{parts:[{text:sys}]},contents:S.hist,generationConfig:{responseMimeType:'application/json',temperature:.6}});
+if(r.status==503||r.status==429){log('Server occupato: riprovo tra '+d+' s');await sleep(d*1000);d*=2;continue}
+if(!r.ok)throw new Error(explain(r.status,j));
+const t=((j.candidates||[])[0]?.content?.parts||[]).map(p=>p.text||'').join('');
+if(!t){log(JSON.stringify(j).slice(0,400));throw new Error('Gemini ha risposto senza testo (forse un blocco di sicurezza). Dettagli nella diagnostica.')}
+S.hist.push({role:'model',parts:[{text:t}]});return parse(t)}
+throw new Error('Il server è troppo occupato. Riprova tra poco.')}
+
+$('#test').onclick=async()=>{if(S.busy)return;err('');$('#mdls').textContent='';if(!keyOk())return;S.busy=true;loader(true);
+try{const{r,j}=await call({contents:[{role:'user',parts:[{text:'Rispondi solo: ok'}]}]},30000);if(!r.ok)throw new Error(explain(r.status,j));$('#mdls').textContent='✅ Connessione riuscita: Chiana è pronto.';tone(880,.2);log('Test riuscito.')}
+catch(e){err(e.message)}S.busy=false;loader(false)};
+
+function busy(b){S.busy=b;loader(b);$('#send').disabled=b;$('#go').disabled=b;mood(b?'think':null);$('#send').textContent=b?'Chiana sta correggendo…':'Rispondi';$('#go').textContent=b?'Chiana sta leggendo…':"Entra nell'arena"}
+function say(t){const q=$('#q');clearInterval(TY);if(RM||!t){q.textContent=t;return}q.textContent='';let i=0;mood('talk');TY=setInterval(()=>{q.textContent=t.slice(0,++i);if(i>=t.length){clearInterval(TY);mood(null)}},14)}
+function setQ(t){$('#res').hidden=true;$('#ans').hidden=false;$('#a').value='';say(t);$('#rn').textContent='Round '+Math.min(S.passed+1,S.n)+' di '+S.n;$('#hpi').style.width=(1-S.passed/S.n)*100+'%';$('#a').focus();tone(660,.1)}
+
+$('#go').onclick=async()=>{if(S.busy)return;err('');if(!keyOk())return;
+const txt=$('#notes').value.trim();if(!txt&&!S.pdf)return err('Carica un file o incolla degli appunti.');
+const parts=[{text:'Ecco il materiale di studio:\n'+txt}];if(S.pdf)parts.push({inline_data:{mime_type:'application/pdf',data:S.pdf}});parts.push({text:'Inizia subito con la prima domanda.'});
+S.nFix=!S.pdf;S.n=S.pdf?8:Math.min(30,Math.max(3,Math.round(((txt.match(/[.!?…]+(\s|$)/g)||[]).length)/6.5)));
+S.hist=[{role:'user',parts}];S.passed=0;S.combo=0;hud();busy(true);
+try{const o=await ask();S.n=Math.min(30,Math.max(1,Math.round(+o.totale||S.n)));S.nFix=true;view('quiz');setQ(o.domanda||'…');banner('Round 1: via!')}catch(e){S.hist=[];err(e.message)}busy(false)};
+
+$('#send').onclick=async()=>{if(S.busy)return;err('');const a=$('#a').value.trim();if(!a)return toast('Scrivi una risposta prima di inviarla.');
+S.hist.push({role:'user',parts:[{text:'La mia risposta: '+a}]});busy(true);
+try{show(await ask())}catch(e){S.hist.pop();err(e.message)}busy(false)};
+$('#a').onkeydown=e=>{if(e.key=='Enter'&&(e.ctrlKey||e.metaKey))$('#send').click()};
+
+function show(o){NEXT=o;const v=Math.max(0,Math.min(10,+o.voto||0)),pass=o.passa!==undefined?!!o.passa:v>=9;
+const mult=1+Math.min(S.combo,4)*.25,gain=Math.round(v*10*mult);
+if(pass){S.combo++;S.passed++}else S.combo=0;S.xp+=gain;
+$('#ans').hidden=true;$('#res').hidden=false;$('#fb').textContent=o.feedback||'';
+const bg=$('#bg');bg.className='big '+(v>=9?'hi':v>=6?'mid':'lo');
+$('#vd').textContent=pass?'Colpo andato a segno!':v>=6?'Ci sei quasi, riprova':'Ahi! Rifacciamo la domanda';
+$('#gn').textContent='+'+gain+' XP'+(mult>1?' (bonus serie x'+mult.toFixed(2)+')':'');
+$('#next').textContent=o.finale?'Vedi il risultato finale':pass?'Prossimo round':'Riprova la domanda';
+$('#hpi').style.width=(1-S.passed/S.n)*100+'%';$('#rn').textContent='Round '+Math.min(S.passed+1,S.n)+' di '+S.n;
+let t0=performance.now();(function c(t){const p=Math.min(1,(t-t0)/700);bg.textContent=(v*p).toFixed(v%1?1:0);if(p<1)requestAnimationFrame(c);else bg.textContent=String(+v.toFixed(1))})(t0);
+fl('+'+gain+' XP','#2ef2c0');
+if(pass){mood('dance');flash('#2ef2c0');hit($('.hp'));confetti();jingle([523,659,784,1047]);fl('-'+Math.round(100/S.n)+' HP','#ff3d8b');medal('p1','Primo colpo');if(S.combo>=3)medal('c3','Serie da 3');if(S.combo>=5)medal('c5','Inarrestabile');if(v>=10)medal('t','Dieci perfetto')}
+else{mood('mad');flash('#ff3d8b');hit($('#res'));tone(180,.3,'sawtooth');setTimeout(()=>tone(130,.35,'sawtooth'),150)}
+hud();$('#res').scrollIntoView({behavior:RM?'auto':'smooth',block:'center'})}
+
+$('#next').onclick=()=>{const o=NEXT;mood(null);if(o.finale)return end(o);setQ(o.domanda||'…')};
+function end(o){const v=+o.voto_finale||0;view('final');mood('dance');$('#hpi').style.width='0';$('#fg').textContent=String(+v.toFixed(1));$('#fg').className='big '+(v>=9?'hi':v>=6?'mid':'lo');
+const st=v>=9?3:v>=7?2:v>=5?1:0;$('#st').textContent='★'.repeat(st)+'☆'.repeat(3-st);
+$('#fr').textContent=o.riepilogo||'';$('#fw').innerHTML='';(o.punti_deboli||[]).forEach(w=>{const l=document.createElement('li');l.textContent=w;$('#fw').appendChild(l)});
+medal('boss','Chiana sconfitto');confetti(240);jingle([523,659,784,1047,1319,1568])}
+$('#again').onclick=()=>{S.hist=[];S.passed=0;S.combo=0;mood(null);hud();view('setup')};
+log('Pagina pronta. Premi "Prova la connessione" per controllare chiave e modello.');hud();
+</script>
+</body>
+</html>
