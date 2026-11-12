@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Patente Duel</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+:root { --yellow:#FFD93D; --orange:#FF9A3C; --blue:#4A90D9; --blue-lt:#EBF4FF; --green:#4CBF5B; --red:#F25555;
+        --bg:#FFF8EE; --text:#3A3A3A; --muted:#9A9A9A; --border:#EDE0CF; }
+body { font-family:'Nunito',sans-serif; background:var(--bg); color:var(--text); min-height:100dvh;
+       display:flex; align-items:center; justify-content:center; padding:12px; overflow-x:hidden; }
+body::before { content:''; position:fixed; inset:0; pointer-events:none;
+  background-image:radial-gradient(circle,#FFD93D26 2px,transparent 2px),radial-gradient(circle,#4A90D922 2px,transparent 2px);
+  background-size:60px 60px,100px 100px; background-position:0 0,40px 40px; }
+.screen { display:none; position:relative; z-index:1; width:100%; max-width:460px; }
+.screen.show { display:block; }
+.card { background:#fff; border:3px solid var(--yellow); border-radius:30px; padding:24px 20px; display:flex; flex-direction:column;
+  gap:14px; box-shadow:0 8px 32px #0001,0 0 0 6px #FFD93D22; animation:in .4s cubic-bezier(.34,1.56,.64,1) both; transition:box-shadow .3s,border-color .3s; }
+@keyframes in { from{opacity:0;transform:translateY(22px) scale(.95)} to{opacity:1;transform:none} }
+h1 { font-size:30px; font-weight:900; color:var(--blue); text-align:center; }
+.sub,.hint { text-align:center; font-weight:700; color:var(--muted); font-size:14px; }
+.rules { background:var(--blue-lt); border-radius:16px; padding:10px 14px; font-size:13px; font-weight:700; line-height:1.7; }
+input[type=text] { width:100%; background:var(--blue-lt); border:2px solid #C5DCEF; border-radius:16px; font:800 18px 'Nunito',sans-serif;
+  color:var(--text); padding:12px; outline:none; text-align:center; }
+input:focus { border-color:var(--blue); }
+#code-input { text-transform:uppercase; letter-spacing:.4em; font-size:24px; }
+.btn { width:100%; padding:13px; border:none; border-radius:16px; font:900 17px 'Nunito',sans-serif; cursor:pointer; transition:transform .12s,box-shadow .12s; }
+.primary { background:var(--yellow); color:#7A5200; box-shadow:0 4px 0 #E6B800; }
+.secondary { background:var(--blue); color:#fff; box-shadow:0 4px 0 #2F6FB3; }
+.btn:active:not(:disabled) { transform:translateY(3px); box-shadow:none; }
+.ghost { background:transparent; color:var(--muted); border:2px dashed var(--border); font-size:13px; padding:9px; }
+.btn:disabled { opacity:.45; cursor:default; }
+.divider { display:flex; align-items:center; gap:10px; color:var(--muted); font-weight:700; font-size:13px; }
+.divider::before,.divider::after { content:''; flex:1; height:2px; background:var(--border); }
+.error { min-height:18px; text-align:center; font-weight:700; font-size:14px; color:var(--red); }
+.code-big { font-size:62px; font-weight:900; letter-spacing:.18em; padding-left:.18em; text-align:center; color:var(--blue); background:var(--blue-lt); border-radius:20px; cursor:pointer; }
+.mute { position:fixed; top:10px; right:10px; z-index:50; width:42px; height:42px; border-radius:50%; border:2px solid var(--border); background:#fff; font-size:20px; cursor:pointer; }
+
+/* game */
+.scores { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.player { --c:var(--blue); border:3px solid var(--border); border-radius:18px; padding:9px 11px; transition:.25s; }
+.player.opp { --c:var(--orange); }
+.player.active { border-color:var(--c); background:color-mix(in srgb,var(--c) 10%,white); transform:translateY(-3px); }
+.pname { font-weight:800; font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.prank { font-size:12px; font-weight:800; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.pscore { font-size:40px; font-weight:900; color:var(--c); line-height:1.05; display:flex; align-items:baseline; gap:8px; }
+.pscore.bump { animation:bump .4s; }
+@keyframes bump { 40%{transform:scale(1.35)} }
+.pscore small { font-size:14px; color:var(--muted); }
+.streak { font-size:14px; font-weight:900; color:var(--orange); min-height:20px; }
+.bar { height:7px; border-radius:7px; background:var(--border); overflow:hidden; margin-top:4px; }
+.bar>div { height:100%; width:0; background:var(--c); transition:width .45s cubic-bezier(.34,1.56,.64,1); }
+.oppwp { font-size:16px; min-height:20px; }
+.turn { text-align:center; font-weight:900; font-size:14px; padding:7px; border-radius:12px; }
+.turn.mine { background:var(--blue-lt); color:var(--blue); } .turn.theirs { background:#FFF1E0; color:#C77100; }
+.statement { font-size:19px; font-weight:800; line-height:1.4; text-align:center; min-height:112px; display:flex; align-items:center; justify-content:center; padding:4px; }
+.statement.dim { opacity:.5; }
+.timer { height:10px; border-radius:10px; background:var(--border); overflow:hidden; }
+.timer>div { height:100%; width:100%; background:var(--green); border-radius:10px; transition:width .25s linear; }
+.timer.low>div { background:var(--red); } .timer.frozen>div { background:#7FD3FF; width:100%!important; }
+.vf { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.vf button { border:none; border-radius:24px; padding:16px 0 12px; color:#fff; font:900 52px/1 'Nunito',sans-serif; cursor:pointer; transition:transform .1s,box-shadow .1s; }
+.vf button small { display:block; font-size:13px; letter-spacing:.1em; margin-top:4px; opacity:.9; }
+#btn-v { background:var(--green); box-shadow:0 6px 0 #2F8F3C; } #btn-f { background:var(--red); box-shadow:0 6px 0 #BC3535; }
+.vf button:active:not(:disabled) { transform:translateY(5px); box-shadow:0 1px 0 #0003; }
+.vf button:disabled { opacity:.4; cursor:default; }
+.powers { display:flex; gap:8px; justify-content:center; min-height:50px; }
+.pu { border:2px solid var(--border); background:#fff; border-radius:14px; padding:6px 12px; font:800 13px 'Nunito',sans-serif; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:2px; animation:pulse 1.6s infinite; }
+.pu span { font-size:22px; line-height:1; } .pu:disabled { opacity:.4; animation:none; }
+.pu.on { background:var(--yellow); border-color:#E6B800; animation:none; }
+@keyframes pulse { 50%{ transform:scale(1.07); box-shadow:0 0 0 6px #FFD93D44; } }
+.feedback { min-height:44px; text-align:center; font-weight:800; font-size:13px; border-radius:12px; padding:8px 10px; line-height:1.4; }
+.feedback.ok { background:#E6F7E8; color:#2E8B3D; } .feedback.bad { background:#FFE9E9; color:#C53B3B; }
+
+/* dopamine layer */
+#fx { position:fixed; inset:0; pointer-events:none; z-index:60; }
+#pops { position:fixed; inset:0; pointer-events:none; z-index:70; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; }
+.pop { font:900 44px 'Nunito',sans-serif; color:var(--green); text-shadow:0 3px 0 #fff,0 0 18px #fff; animation:rise 1.3s ease-out forwards; text-align:center; padding:0 12px; }
+.pop.bad { color:var(--red); } .pop.big { color:var(--orange); font-size:54px; } .pop.gold { color:#E6A800; font-size:34px; }
+@keyframes rise { 0%{opacity:0;transform:translateY(30px) scale(.4)} 18%{opacity:1;transform:translateY(0) scale(1.25)} 35%{transform:scale(1)} 100%{opacity:0;transform:translateY(-90px) scale(1)} }
+.shake { animation:shake .45s; }
+@keyframes shake { 0%,100%{transform:translate(0)} 15%{transform:translate(-10px,3px)} 30%{transform:translate(9px,-4px)} 45%{transform:translate(-7px,2px)} 60%{transform:translate(6px,-2px)} 80%{transform:translate(-3px,1px)} }
+.card.fire { border-color:var(--orange); animation:fire 1s infinite alternate; }
+.card.inferno { border-color:var(--red); animation:fire .55s infinite alternate; }
+@keyframes fire { from{box-shadow:0 0 14px 2px #FF9A3C88,0 0 0 6px #FF9A3C33} to{box-shadow:0 0 34px 10px #FF5A1F99,0 0 0 9px #FF9A3C55} }
+.trophy { font-size:72px; text-align:center; animation:float 3s ease-in-out infinite; }
+@keyframes float { 50%{transform:translateY(-10px) rotate(3deg)} }
+@media (prefers-reduced-motion:reduce) { .card,.pop,.pu,.trophy { animation:none!important; } }
+</style>
+</head>
+<body>
+<canvas id="fx"></canvas><div id="pops"></div>
+<button class="mute" id="mute">🔊</button>
+
+<div class="screen show" id="s-lobby"><div class="card">
+  <h1>🚗 Patente Duel</h1>
+  <p class="sub">Sfida un compagno sul quiz della scuola guida. Vero o Falso: il primo a 10 punti vince!</p>
+  <div class="rules">🔥 3 giuste di fila = combo ×2 (5 = ×3)<br>🎁 ogni 3 di fila vinci un power-up<br>❌ risposta sbagliata o tempo scaduto = −1 punto</div>
+  <input type="text" id="name-input" maxlength="16" autocomplete="off" placeholder="Il tuo nome">
+  <button class="btn primary" id="create-btn">Crea una stanza</button>
+  <div class="divider">oppure</div>
+  <input type="text" id="code-input" maxlength="4" autocomplete="off" placeholder="ABCD">
+  <button class="btn secondary" id="join-btn">Entra con il codice</button>
+  <div class="error" id="lobby-error"></div>
+</div></div>
+
+<div class="screen" id="s-wait"><div class="card">
+  <h1>Codice stanza</h1>
+  <div class="code-big" id="wait-code"></div>
+  <p class="hint">Dai questo codice al tuo compagno e aspetta…</p>
+  <button class="btn ghost" id="wait-leave">Annulla</button>
+</div></div>
+
+<div class="screen" id="s-game"><div class="card" id="game-card">
+  <div class="scores">
+    <div class="player me" id="p-me"><div class="pname" id="me-name"></div><div class="prank" id="me-rank"></div>
+      <div class="pscore" id="me-sc-wrap"><span id="me-score">0</span><small>/ 10</small></div>
+      <div class="streak" id="me-streak"></div><div class="bar"><div id="me-bar"></div></div></div>
+    <div class="player opp" id="p-opp"><div class="pname" id="opp-name"></div><div class="prank" id="opp-rank"></div>
+      <div class="pscore" id="opp-sc-wrap"><span id="opp-score">0</span><small>/ 10</small></div>
+      <div class="streak" id="opp-streak"></div><div class="bar"><div id="opp-bar"></div></div><div class="oppwp" id="opp-pu"></div></div>
+  </div>
+  <div class="turn" id="turn"></div>
+  <div class="statement" id="statement"></div>
+  <div class="timer" id="timer"><div></div></div>
+  <div class="vf"><button id="btn-v">V<small>VERO</small></button><button id="btn-f">F<small>FALSO</small></button></div>
+  <div class="powers" id="powers"></div>
+  <div class="feedback" id="feedback"></div>
+  <button class="btn ghost" id="game-leave">Abbandona la partita</button>
+</div></div>
+
+<div class="screen" id="s-end"><div class="card">
+  <div class="trophy" id="end-icon"></div><h1 id="end-title"></h1>
+  <div class="sub" id="end-score" style="font-size:18px;color:var(--text);font-weight:900"></div>
+  <button class="btn primary" id="rematch-btn">Rivincita!</button>
+  <button class="btn ghost" id="end-leave">Torna alla lobby</button>
+</div></div>
+
+<script>
+// Incolla qui l'URL di ngrok se apri il file in locale. Se apri la pagina dall'URL ngrok, lascia così.
+const HARDCODED_URL = "https://blightingly-in-golly.ngrok-free.app";
+const API = HARDCODED_URL.includes("YOUR-DOMAIN") ? location.origin : HARDCODED_URL.replace(/\/$/, "");
+const POLL_MS = 800;
+const RANKS = [[0,"Foglio rosa","📄"],[2,"Principiante","🚸"],[4,"Neopatentato","🚗"],[6,"Autista esperto","🏎️"],[8,"Pilota","🏁"]];
+const PU = { double:["⚡","Doppio"], steal:["🥷","Furto"], freeze:["❄️","Gelo"] };
+const rankIdx = sc => RANKS.reduce((r, x, i) => sc >= x[0] ? i : r, 0);
+const mult = st => st >= 5 ? 3 : st >= 3 ? 2 : 1;
+const $ = id => document.getElementById(id);
+
+// ── Suoni (sintetizzati, nessun file) e vibrazione ──────────────────────────
+let AC = null, muted = localStorage.getItem("pd_mute") === "1";
+function ac() { if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} } if (AC && AC.state === "suspended") AC.resume(); return AC; }
+function tone(f, d, type = "sine", v = .15, t0 = 0, f2) {
+  if (muted) return; const c = ac(); if (!c) return;
+  const o = c.createOscillator(), g = c.createGain(), t = c.currentTime + t0;
+  o.type = type; o.frequency.setValueAtTime(f, t); if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + d);
+  g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(.001, t + d);
+  o.connect(g).connect(c.destination); o.start(t); o.stop(t + d + .02);
+}
+const sfx = {
+  good: s => { const k = 2 ** (Math.min(s, 9) / 12); [523, 659, 784, 1047].forEach((f, i) => tone(f * k, .2, "triangle", .17, i * .06)); },
+  bad: () => tone(230, .4, "sawtooth", .14, 0, 80),
+  tick: () => tone(900, .05, "square", .05),
+  turn: () => { tone(660, .08, "sine", .12); tone(880, .1, "sine", .12, .08); },
+  power: () => { tone(300, .35, "sawtooth", .08, 0, 1400); tone(1400, .15, "triangle", .12, .3); },
+  rank: () => [523, 659, 784, 1047, 1319].forEach((f, i) => tone(f, .25, "square", .09, i * .09)),
+  win: () => [523, 659, 784, 1047, 784, 1047, 1319, 1568].forEach((f, i) => tone(f, .3, "triangle", .15, i * .12)),
+  lose: () => [392, 349, 311, 262].forEach((f, i) => tone(f, .35, "sawtooth", .08, i * .2)),
+};
+const vib = p => { if (!muted && navigator.vibrate) navigator.vibrate(p); };
+$("mute").textContent = muted ? "🔇" : "🔊";
+$("mute").onclick = () => { muted = !muted; localStorage.setItem("pd_mute", muted ? "1" : "0"); $("mute").textContent = muted ? "🔇" : "🔊"; if (!muted) sfx.turn(); };
+
+// ── Coriandoli, scritte che salgono, scossone ───────────────────────────────
+const cv = $("fx"), cx = cv.getContext("2d"); let parts = [], raf = 0;
+const calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
+function fit() { cv.width = innerWidth; cv.height = innerHeight; } addEventListener("resize", fit); fit();
+function burst(n, power = 1, x = innerWidth / 2, y = innerHeight * .45) {
+  if (calm) return;
+  const cols = ["#FFD93D", "#FF9A3C", "#4A90D9", "#4CBF5B", "#F25555", "#ffffff"];
+  for (let i = 0; i < n; i++) { const a = Math.random() * 6.28, s = (4 + Math.random() * 9) * power;
+    parts.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 6, r: 4 + Math.random() * 5, c: cols[i % 6], life: 70 + Math.random() * 50, rot: Math.random() * 6 }); }
+  if (!raf) raf = requestAnimationFrame(loop);
+}
+function loop() {
+  cx.clearRect(0, 0, cv.width, cv.height); parts = parts.filter(p => p.life > 0);
+  for (const p of parts) { p.vy += .26; p.x += p.vx; p.y += p.vy; p.vx *= .99; p.life--; p.rot += .2;
+    cx.save(); cx.translate(p.x, p.y); cx.rotate(p.rot); cx.fillStyle = p.c; cx.globalAlpha = Math.min(1, p.life / 30); cx.fillRect(-p.r, -p.r / 2, p.r * 2, p.r); cx.restore(); }
+  raf = parts.length ? requestAnimationFrame(loop) : 0;
+}
+function pop(text, cls = "") { const d = document.createElement("div"); d.className = "pop " + cls; d.textContent = text; $("pops").appendChild(d); setTimeout(() => d.remove(), 1350); }
+function shake() { const c = $("game-card"); c.classList.remove("shake"); void c.offsetWidth; c.classList.add("shake"); setTimeout(() => c.classList.remove("shake"), 500); }
+function bump(id) { const e = $(id); e.classList.remove("bump"); void e.offsetWidth; e.classList.add("bump"); }
+
+// ── Rete ────────────────────────────────────────────────────────────────────
+let session = null, pollTimer = null, tickTimer = null, last = null, seenSeq = -1, firstSync = true;
+let deadline = 0, turnSecs = 15, frozen = false, sending = false, lastTick = -1;
+function show(id) { document.querySelectorAll(".screen").forEach(s => s.classList.toggle("show", s.id === id)); }
+async function api(path, payload) {
+  const res = await fetch(API + path, { method: "POST", headers: { "Content-Type": "application/json", "ngrok-skip-browser-warning": "1" }, body: JSON.stringify(payload || {}) });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw Object.assign(new Error(data.error || "Impossibile raggiungere il server."), { status: res.status });
+  return data;
+}
+const lobbyError = m => $("lobby-error").textContent = m || "";
+$("name-input").value = localStorage.getItem("pd_name") || "";
+function getName() { const n = $("name-input").value.trim(); if (!n) { lobbyError("Scrivi il tuo nome."); return null; } localStorage.setItem("pd_name", n); return n; }
+async function enter(path, payload) {
+  ac(); lobbyError("");
+  try { const r = await api(path, payload); session = { code: r.code, pid: r.player_id }; sessionStorage.setItem("pd", JSON.stringify(session)); startPolling(); }
+  catch (e) { lobbyError(e.message === "Failed to fetch" ? "Impossibile raggiungere il server." : e.message); }
+}
+$("create-btn").onclick = () => { const n = getName(); if (n) enter("/create_room", { name: n }); };
+$("join-btn").onclick = () => { const n = getName(); if (!n) return; const c = $("code-input").value.trim().toUpperCase(); if (c.length !== 4) return lobbyError("Scrivi il codice di 4 lettere."); enter("/join_room", { name: n, code: c }); };
+$("code-input").onkeydown = e => { if (e.key === "Enter") $("join-btn").click(); };
+$("wait-code").onclick = () => navigator.clipboard?.writeText($("wait-code").textContent);
+async function leave() {
+  stopPolling(); if (session) api("/leave", { code: session.code, player_id: session.pid }).catch(() => {});
+  session = null; last = null; sessionStorage.removeItem("pd"); lobbyError(""); show("s-lobby");
+}
+["wait-leave", "game-leave", "end-leave"].forEach(id => $(id).onclick = leave);
+function startPolling() { stopPolling(); seenSeq = -1; firstSync = true; poll(); pollTimer = setInterval(poll, POLL_MS); tickTimer = setInterval(drawTimer, 200); }
+function stopPolling() { clearInterval(pollTimer); clearInterval(tickTimer); }
+async function poll() {
+  if (!session || sending) return;
+  try { render(await api("/state", { code: session.code, player_id: session.pid })); }
+  catch (e) {
+    if (e.status === 404 || e.status === 403) { await leave(); lobbyError("La stanza non esiste più."); }
+    else console.error(e);   // network hiccup or display bug: keep the game, try again on the next poll
+  }
+}
+
+// ── Rendering ───────────────────────────────────────────────────────────────
+function render(s) {
+  const prev = last; last = s;
+  if (s.status === "waiting") { $("wait-code").textContent = s.code; show("s-wait"); return; }
+  if (s.status === "abandoned") { stopPolling(); return showEnd(null, s); }
+
+  const me = s.me, op = s.opponent;
+  $("me-name").textContent = me.name; $("opp-name").textContent = op.name + (op.online ? "" : " 📴");
+  setScore("me", me.score, prev && prev.me ? prev.me.score : null, s.target); setScore("opp", op.score, prev && prev.opponent ? prev.opponent.score : null, s.target);
+  const ri = rankIdx(me.score); $("me-rank").textContent = RANKS[ri][2] + " " + RANKS[ri][1];
+  const oi = rankIdx(op.score); $("opp-rank").textContent = RANKS[oi][2] + " " + RANKS[oi][1];
+  $("me-streak").textContent = me.streak ? `🔥 ${me.streak}` + (mult(me.streak) > 1 ? `  ×${mult(me.streak)}` : "") : "";
+  $("opp-streak").textContent = op.streak ? `🔥 ${op.streak}` : "";
+  $("opp-pu").textContent = op.powerups.map(p => PU[p][0]).join(" ");
+  const card = $("game-card");
+  card.classList.toggle("fire", me.streak >= 3 && me.streak < 5); card.classList.toggle("inferno", me.streak >= 5);
+
+  // eventi (suoni, scritte, coriandoli) – una sola volta per evento
+  const ev = s.last_event;
+  if (firstSync) { seenSeq = ev ? ev.seq : 0; firstSync = false; }
+  else if (ev && ev.seq > seenSeq) { seenSeq = ev.seq; handleEvent(ev); }
+  if (prev && prev.me && rankIdx(me.score) > rankIdx(prev.me.score)) setTimeout(() => { sfx.rank(); vib([60, 40, 60, 40, 120]); burst(60, 1.3); pop(`${RANKS[ri][2]} ${RANKS[ri][1]}!`, "gold"); }, 650);
+
+  if (s.status === "finished") { stopPolling(); return showEnd(s.winner, s); }
+
+  show("s-game");
+  turnSecs = s.turn_seconds; frozen = s.frozen; deadline = Date.now() + s.seconds_left * 1000;
+  const mine = s.my_turn;
+  $("p-me").classList.toggle("active", mine); $("p-opp").classList.toggle("active", !mine);
+  $("turn").className = "turn " + (mine ? "mine" : "theirs");
+  $("turn").textContent = mine ? "Tocca a te! V o F?" : `Tocca a ${op.name}…`;
+  $("statement").textContent = s.question; $("statement").classList.toggle("dim", !mine);
+  $("btn-v").disabled = $("btn-f").disabled = !mine;
+  if (prev && prev.status === "playing" && !prev.my_turn && mine) { sfx.turn(); vib(40); }
+  renderPowers(s);
+  drawTimer();
+}
+function setScore(who, now, before, target) {
+  $(who + "-score").textContent = now; $(who + "-bar").style.width = Math.min(100, now / target * 100) + "%";
+  if (before !== null && before !== undefined && before !== now) bump(who + "-sc-wrap");
+}
+function renderPowers(s) {
+  const box = $("powers"); box.innerHTML = "";
+  s.armed.forEach(p => { const b = document.createElement("button"); b.className = "pu on"; b.disabled = true; b.innerHTML = `<span>${PU[p][0]}</span>${PU[p][1]} attivo`; box.appendChild(b); });
+  s.me.powerups.forEach(p => { const b = document.createElement("button"); b.className = "pu"; b.disabled = !s.my_turn || sending; b.innerHTML = `<span>${PU[p][0]}</span>${PU[p][1]}`; b.onclick = () => usePower(p); box.appendChild(b); });
+}
+function handleEvent(ev) {
+  const gain = ev.delta + ev.stolen, fb = $("feedback");
+  fb.className = "feedback " + (ev.correct ? "ok" : "bad");
+  fb.textContent = `${ev.correct ? "✅" : "❌"} ${ev.by_me ? "Tu" : ev.player}: era ${ev.truth ? "VERO" : "FALSO"} — «${ev.statement}»`;
+  if (ev.by_me) {
+    if (ev.correct) {
+      sfx.good(ev.streak); vib([30, 40, 30]); pop("+" + gain); burst(16 + ev.streak * 12, 1 + ev.streak * .08);
+      if (ev.mult > 1) setTimeout(() => pop(`COMBO ×${ev.mult} 🔥`, "big"), 250);
+      if (ev.armed.includes("double")) setTimeout(() => pop("⚡ PUNTI DOPPI", "gold"), 450);
+      if (ev.stolen) setTimeout(() => pop(`🥷 hai rubato ${ev.stolen}`, "gold"), 600);
+      if (ev.earned) setTimeout(() => { sfx.power(); vib([40, 30, 40]); burst(30, .9); pop(`🎁 ${PU[ev.earned][0]} ${PU[ev.earned][1]}!`, "gold"); }, 800);
+    } else { sfx.bad(); vib(220); shake(); pop(ev.given === null ? "⏰ Tempo scaduto!" : (ev.delta ? "−1" : "Ahia!"), "bad"); }
+  } else if (ev.stolen) { sfx.bad(); vib([80, 60, 80]); shake(); pop(`🥷 ${ev.player} ti ha rubato ${ev.stolen}!`, "bad"); }
+  else if (ev.correct) tone(520, .12, "sine", .08); else tone(300, .15, "triangle", .08);
+}
+function drawTimer() {
+  if (!last || last.status !== "playing") return;
+  const t = $("timer"), left = Math.max(0, (deadline - Date.now()) / 1000);
+  t.classList.toggle("frozen", frozen); t.classList.toggle("low", !frozen && left < 5);
+  t.firstElementChild.style.width = frozen ? "100%" : (left / turnSecs * 100) + "%";
+  if (!frozen && last.my_turn && left < 5 && left > 0 && Math.ceil(left) !== lastTick) { lastTick = Math.ceil(left); sfx.tick(); vib(15); }
+}
+function showEnd(winner, s) {
+  show("s-end"); $("rematch-btn").style.display = winner ? "" : "none";
+  if (winner === null) { $("end-icon").textContent = "👋"; $("end-title").textContent = `${s.left || "L'avversario"} ha lasciato la partita.`; $("end-score").textContent = ""; return; }
+  const won = winner === "me";
+  $("end-icon").textContent = won ? "🏆" : "🚧"; $("end-title").textContent = won ? "Campione della strada!" : "Hai perso… rivincita?";
+  $("end-score").textContent = `${s.me.name} ${s.me.score} – ${s.opponent.score} ${s.opponent.name}`;
+  if (won) { sfx.win(); vib([100, 50, 100, 50, 300]); [0, 300, 600, 900].forEach(t => setTimeout(() => burst(70, 1.4), t)); } else { sfx.lose(); vib(400); }
+}
+$("rematch-btn").onclick = async () => { try { firstSync = true; render(await api("/rematch", { code: session.code, player_id: session.pid })); startPolling(); } catch (e) {} };
+
+// ── Azioni ──────────────────────────────────────────────────────────────────
+async function sendAnswer(v) {
+  if (!last || last.status !== "playing" || !last.my_turn || sending) return;
+  sending = true; $("btn-v").disabled = $("btn-f").disabled = true;
+  try { const s = await api("/answer", { code: session.code, player_id: session.pid, answer: v }); sending = false; render(s); }
+  catch (e) { sending = false; }
+}
+async function usePower(p) {
+  if (!last || !last.my_turn || sending) return;
+  sending = true; sfx.power(); vib(30);
+  try { const s = await api("/power", { code: session.code, player_id: session.pid, power: p }); sending = false; pop(`${PU[p][0]} ${PU[p][1]}!`, "gold"); burst(18, .8); render(s); }
+  catch (e) { sending = false; }
+}
+$("btn-v").onclick = () => sendAnswer("V"); $("btn-f").onclick = () => sendAnswer("F");
+addEventListener("keydown", e => {
+  if (e.target.tagName === "INPUT" || e.ctrlKey || e.metaKey) return;
+  const k = e.key.toLowerCase(); if (k === "v") sendAnswer("V"); if (k === "f") sendAnswer("F");
+});
+try { const sv = JSON.parse(sessionStorage.getItem("pd") || "null"); if (sv && sv.code && sv.pid) { session = sv; startPolling(); } } catch (e) {}
+</script>
+</body>
+</html>
