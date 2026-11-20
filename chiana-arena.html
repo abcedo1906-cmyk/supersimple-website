@@ -79,14 +79,26 @@
   <div id="confetti"></div>
 
   <script>
-    // When served by server.py no setup is required.  A local file opened by
-    // double-click uses the configured public tunnel; ?api=URL still overrides it.
-    const queryApi = new URLSearchParams(location.search).get('api');
-    const NGROK_SERVER_URL = 'https://blightingly-in-golly.ngrok-free.app';
-    const API_BASE = (queryApi ? queryApi.replace(/\/$/, '') :
-      (location.protocol === 'file:' ? NGROK_SERVER_URL : location.origin));
-    const TUNNEL_HEADERS = API_BASE.includes('.ngrok-free.app') ? {'ngrok-skip-browser-warning':'true'} : {};
-    const $ = selector => document.querySelector(selector);
+    // Chiana Arena API configuration
+const queryApi = new URLSearchParams(location.search).get('api');
+
+const NGROK_SERVER_URL = 'https://blightingly-in-golly.ngrok-free.app';
+
+// Use localhost when running through server.py.
+// Use ngrok when opened as a file or hosted online.
+const isLocalServer =
+  location.protocol !== 'file:' &&
+  ['localhost', '127.0.0.1'].includes(location.hostname);
+
+const API_BASE = queryApi
+  ? queryApi.replace(/\/$/, '')
+  : isLocalServer
+    ? location.origin
+    : NGROK_SERVER_URL;
+
+const TUNNEL_HEADERS = API_BASE.includes('.ngrok-free.app')
+  ? {'ngrok-skip-browser-warning': 'true'}
+  : {};    const $ = selector => document.querySelector(selector);
     const state = { history: [], question: '', total: 6, passed: 0, xp: 0, level: 1, muted: false, result: null };
     const QUIZ_SYSTEM = `Sei Chiana, un robot-professore severo ma costruttivo. Parla sempre in italiano, al maschile, e dai del tu.
 Devi interrogare lo studente ESCLUSIVAMENTE sul materiale fornito. Fai una sola domanda per volta. Valuta una risposta da 0 a 10; se è sotto 9, chiedi di rispondere di nuovo alla stessa domanda, riformulata. Quando supera 9, passa alla domanda successiva. Fai al massimo 6 domande significative.
